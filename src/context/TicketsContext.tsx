@@ -16,7 +16,13 @@ import {
   upsertCachedTicket,
 } from '@/db/ticketCacheRepository';
 import { getBaseUrl, getErrorMessage } from '@/services/api';
-import { createItem, deleteItem, getItems, updateItem } from '@/services/resourceService';
+import {
+  createItem,
+  deleteItem,
+  getItemById,
+  getItems,
+  updateItem,
+} from '@/services/resourceService';
 import type { Ticket, TicketInput, TicketUpdate } from '@/types/Entity';
 
 type LoadStatus = 'loading' | 'ready' | 'error';
@@ -39,6 +45,7 @@ type TicketsAction =
 
 interface TicketsContextValue extends TicketsState {
   fetchTickets: (options?: { refreshing?: boolean }) => Promise<void>;
+  fetchTicket: (id: string) => Promise<Ticket>;
   addTicket: (input: TicketInput) => Promise<Ticket>;
   editTicket: (id: string, changes: TicketUpdate) => Promise<Ticket>;
   removeTicket: (id: string) => Promise<void>;
@@ -144,6 +151,22 @@ export function TicketsProvider({ children }: { children: ReactNode }) {
     };
   }, [db, fetchTickets]);
 
+  // El detalle siempre consulta el servidor; la respuesta también refresca listado y caché.
+  const fetchTicket = useCallback(
+    async (id: string) => {
+      let ticket: Ticket;
+      try {
+        ticket = await getItemById(id);
+      } catch (error) {
+        throw toFriendlyError(error);
+      }
+      dispatch({ type: 'ticket_saved', ticket });
+      upsertCachedTicket(db, getBaseUrl(), ticket).catch(reportCacheError);
+      return ticket;
+    },
+    [db],
+  );
+
   const addTicket = useCallback(
     async (input: TicketInput) => {
       let ticket: Ticket;
@@ -188,8 +211,8 @@ export function TicketsProvider({ children }: { children: ReactNode }) {
   );
 
   const value = useMemo(
-    () => ({ ...state, fetchTickets, addTicket, editTicket, removeTicket }),
-    [state, fetchTickets, addTicket, editTicket, removeTicket],
+    () => ({ ...state, fetchTickets, fetchTicket, addTicket, editTicket, removeTicket }),
+    [state, fetchTickets, fetchTicket, addTicket, editTicket, removeTicket],
   );
 
   return <TicketsContext value={value}>{children}</TicketsContext>;

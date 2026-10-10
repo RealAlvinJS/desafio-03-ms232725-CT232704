@@ -36,6 +36,7 @@ interface GradientButtonProps {
 
 // La capa de gradiente mide el triple del botón y se desplaza: solo transform, sin costo de layout.
 const GRADIENT_SCALE = 3;
+const ICON_MIN_WIDTH = 150;
 
 export function GradientButton({
   label,
@@ -78,6 +79,9 @@ export function GradientButton({
     transform: [{ translateX: translateX.get() }],
   }));
 
+  // En espacios angostos (como la isla con atrás) se prioriza el texto sobre el ícono.
+  const showIcon = Icon !== undefined && (width === 0 || width >= ICON_MIN_WIDTH);
+
   const handleLayout = (event: LayoutChangeEvent) => {
     setWidth(event.nativeEvent.layout.width);
   };
@@ -106,7 +110,7 @@ export function GradientButton({
         <ActivityIndicator color={colors.textOnDark} />
       ) : (
         <View style={styles.content}>
-          {Icon && (
+          {showIcon && Icon && (
             <Icon color={colors.textOnDark} size={sizes.icon} strokeWidth={sizes.iconStroke} />
           )}
           <Text style={styles.label} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>

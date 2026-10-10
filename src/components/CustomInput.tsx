@@ -16,6 +16,10 @@ interface CustomInputProps extends Pick<
   'placeholder' | 'keyboardType' | 'autoCapitalize' | 'autoCorrect' | 'maxLength' | 'returnKeyType'
 > {
   label: string;
+  // Oculta el label visible cuando el contexto ya lo nombra; se conserva para accesibilidad.
+  hideLabel?: boolean;
+  // muted: para inputs sobre superficies blancas.
+  tone?: 'default' | 'muted';
   value: string;
   onChangeText: (value: string) => void;
   error?: string;
@@ -45,6 +49,8 @@ export function FieldError({ message }: { message: string }) {
 // El borde comunica el estado: morado al enfocar, rojo con error (el error tiene prioridad).
 export function CustomInput({
   label,
+  hideLabel = false,
+  tone = 'default',
   value,
   onChangeText,
   error,
@@ -55,6 +61,7 @@ export function CustomInput({
   const [isFocused, setIsFocused] = useState(false);
   const focus = useSharedValue(0);
   const hasError = error !== undefined;
+  const idleColor = tone === 'muted' ? colors.surfaceMuted : colors.surface;
 
   useEffect(() => {
     focus.set(withTiming(isFocused ? 1 : 0, { duration: motion.chip }));
@@ -63,14 +70,20 @@ export function CustomInput({
   const borderStyle = useAnimatedStyle(() => ({
     borderColor: hasError
       ? colors.red
-      : interpolateColor(focus.get(), [0, 1], [colors.surface, colors.purple]),
+      : interpolateColor(focus.get(), [0, 1], [idleColor, colors.purple]),
   }));
 
   return (
     <View style={styles.field}>
-      <Text style={styles.label}>{label}</Text>
+      {!hideLabel && <Text style={styles.label}>{label}</Text>}
 
-      <Animated.View style={[styles.box, multiline && styles.boxMultiline, borderStyle]}>
+      <Animated.View
+        style={[
+          styles.box,
+          { backgroundColor: idleColor },
+          multiline && styles.boxMultiline,
+          borderStyle,
+        ]}>
         <TextInput
           value={value}
           onChangeText={onChangeText}

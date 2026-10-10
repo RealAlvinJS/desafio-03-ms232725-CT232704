@@ -6,6 +6,43 @@ Se actualiza al cerrar cada hito, junto con su commit. Los hitos están definido
 
 ---
 
+## [H6] Detalle, actualización y eliminación (GET / PATCH / DELETE) — 2026-10-09
+
+### Agregado
+- `detail/[id].tsx` con composición split invertida:
+  - Header negro con prioridad, badge de estado (crossfade al cambiar), título, departamento, número de ticket y fecha completa.
+  - Cuerpo con secciones: estado (segmented), descripción, evidencia (`EvidenceImage`), responsable y "Eliminar ticket".
+- `fetchTicket(id)` en `TicketsContext`: el detalle siempre consulta `GET /tickets/:id` y la respuesta también refresca el listado y la caché.
+- Cambio de estado con `Alert` de confirmación → PATCH, con haptic de éxito o error.
+- Reasignación inline: al editar el responsable con un valor válido y distinto, aparece **"Reasignar"** como acción de la isla → `Alert` → PATCH.
+- Eliminación con `Alert` destructivo → DELETE → haptic Medium → regreso al listado.
+- Estados: carga (spinner si el ticket no estaba en memoria), error/no encontrado con "Volver".
+- `useLightStatusBar` (hook compartido por las pantallas con header negro), `validateAssignee`, y en `CustomInput` las props `hideLabel` y `tone="muted"`.
+- `GradientButton` oculta el ícono cuando su ancho es menor de 150 pt para que el texto no se corte.
+
+### Decisiones
+- Regla de negocio: un ticket **Resuelto no se reasigna**; el input se reemplaza por el nombre con un candado y una nota.
+- El segmented de estado no cambia hasta confirmar el Alert: si se cancela, queda en el estado real.
+- El ticket en memoria pinta la pantalla al instante y el GET por id lo actualiza (cache-first a nivel de detalle).
+- "Reasignar" vive en la isla y solo aparece cuando hay un cambio válido que guardar.
+
+### Problemas
+- El input del responsable era blanco sobre la card blanca y repetía el label → `tone="muted"` + `hideLabel`.
+- "Reasignar" se cortaba en el espacio que deja la isla con atrás → el ícono se oculta en anchos chicos.
+
+### Verificado
+- `npm run check` sin errores.
+- En el simulador, sobre el ticket #2:
+  - En proceso → Resuelto: MockAPI guardó `resolved`, el badge cambió y el responsable quedó bloqueado. Luego volvió a En proceso.
+  - Reasignado a "Andrea López Ruiz": MockAPI lo guardó y "Reasignar" salió de la isla.
+- Eliminación del #14: alert destructivo; MockAPI devuelve 404 y el listado bajó a 7 abiertos y 4 de alta sin refetch.
+- Fallback de evidencia rota visible en el detalle.
+
+### Limpieza
+- El #2 se restauró a "Andrea López" y el #13 de prueba se eliminó vía API: MockAPI vuelve a tener exactamente los 12 tickets del seed.
+
+---
+
 ## [H5.2] Isla de navegación con extensiones — 2026-10-09
 
 ### Agregado

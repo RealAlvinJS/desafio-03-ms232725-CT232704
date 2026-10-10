@@ -158,7 +158,7 @@ cuerpo `canvas`. Así las tabs se reconocen como familia y cada una tiene su pro
 |---|---|---|
 | Tickets (`index`) | Split | Stat cards, segmented de estado, chips de prioridad y lista |
 | Nuevo (`create`) | Split invertido + pasos | Formulario de 4 pasos (ver §5.4) |
-| Detalle (`detail/[id]`) | Light | Card principal con la info, segmented de estado, reasignación y botón eliminar (outline rojo) |
+| Detalle (`detail/[id]`) | Split invertido | Header negro (prioridad, badge, título, departamento, #id y fecha) + secciones: estado (segmented), descripción, evidencia, responsable (input muted; candado si está resuelto) y eliminar (outline rojo). "Reasignar" aparece en la isla solo con un cambio válido |
 | Ajustes (`settings`) | Light | Card con la baseURL ("Probar conexión", "Restaurar") + card Departamentos (lista editable, input pill + botón circular "+") |
 
 ### 5.4 Formulario por pasos (Nuevo ticket)

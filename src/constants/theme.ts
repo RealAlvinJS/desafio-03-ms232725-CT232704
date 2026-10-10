@@ -87,6 +87,7 @@ export const motion = {
   press: 120,
   chip: 150,
   indicator: 250,
+  crossfade: 200,
   enter: 250,
   emptyState: 300,
   staggerStep: 40,

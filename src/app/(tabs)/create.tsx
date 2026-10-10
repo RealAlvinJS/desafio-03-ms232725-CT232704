@@ -1,8 +1,7 @@
 import * as Haptics from 'expo-haptics';
-import { router, useFocusEffect } from 'expo-router';
-import { setStatusBarStyle } from 'expo-status-bar';
+import { router } from 'expo-router';
 import { ArrowRight, Plus, Settings } from 'lucide-react-native';
-import { useCallback, useRef, useState, type ReactNode } from 'react';
+import { useRef, useState, type ReactNode } from 'react';
 import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
 import Animated, { FadeIn, FadeInLeft, FadeInRight } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -20,6 +19,7 @@ import { colors, motion, radii, spacing, typography } from '@/constants/theme';
 import { useDepartments } from '@/context/DepartmentsContext';
 import { useNavActions } from '@/context/NavActionsContext';
 import { useTickets } from '@/context/TicketsContext';
+import { useLightStatusBar } from '@/hooks/useLightStatusBar';
 import {
   EMPTY_TICKET_FORM,
   TICKET_LIMITS,
@@ -94,13 +94,7 @@ export default function CreateTicketScreen() {
   const [attempted, setAttempted] = useState<ReadonlySet<number>>(new Set());
   const [isSaving, setIsSaving] = useState(false);
 
-  // El header es negro: mientras esta tab está enfocada la barra de estado va en claro.
-  useFocusEffect(
-    useCallback(() => {
-      setStatusBarStyle('light');
-      return () => setStatusBarStyle('dark');
-    }, []),
-  );
+  useLightStatusBar();
 
   const currentStep = STEPS[step] ?? STEPS[0]!;
   const allErrors = validateTicket(form);

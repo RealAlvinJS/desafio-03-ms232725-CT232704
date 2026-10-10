@@ -110,3 +110,7 @@ export function pickErrors(
     fields.filter((field) => errors[field]).map((field) => [field, errors[field]]),
   ) as TicketFormErrors;
 }
+
+export function validateAssignee(name: string): string | undefined {
+  return lengthError(name, TICKET_LIMITS.assigneeMin, TICKET_LIMITS.assigneeMax, 'El responsable');
+}
