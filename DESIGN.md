@@ -161,14 +161,14 @@ que "flota" sobre una zona negra**.
 ### Navbar flotante (`(tabs)/_layout.tsx`, `tabBar` personalizado)
 - Contenedor pill: `ink` sobre la zona negra y gris translúcido (`#0A0A0A` al 55 %) sobre pantallas claras, como en la referencia.
 - Ítems circulares de 52; los inactivos en `ink3` con el ícono en `textOnDarkMuted`.
-- **Activo**: un círculo `ink` que **se desliza** hasta la nueva tab (timing 220 ms, ease-out; es un indicador absoluto).
-  El ícono activo usa el `brandGradient`.
+- **Activo**: un círculo `ink` con **anillo de 2 px en `brandGradient`** que **se desliza** hasta la nueva tab
+  (250 ms, ease-in-out porque se desplaza en pantalla; es un indicador absoluto). El ícono activo es blanco.
 - Al cambiar de tab: `Haptics.selectionAsync()`. El contenido de la pantalla **no** se anima.
 - Separado 16 del borde inferior y respetando el safe area.
 
 ### Segmented control (filtro de estado / selector de prioridad)
 - Contenedor pill `surface` (o `ink2` en la zona negra), opciones `label`.
-- El pill activo `ink` **se desliza** entre opciones (200 ms, ease-out) y el texto activo es blanco.
+- El pill activo `ink` **se desliza** entre opciones (250 ms, ease-in-out) y el texto activo es blanco.
 - Opciones: `Todos · Abierto · En proceso · Resuelto`.
 
 ### Chip
@@ -192,15 +192,16 @@ que "flota" sobre una zona negra**.
 ```
 - Radio `lg`, padding 20 y `ink2` sobre la zona negra.
 - Press: `scale 0.97` en 120 ms.
-- Entrada: solo en el **primer render** de la lista, con fade + `translateY 8` y un escalonado de 40 ms (tope de 6 items).
-  Al filtrar, los items se reacomodan con `LinearTransition` de 200 ms.
+- Entrada: **nunca `entering` en filas del FlatList** (las filas se desmontan y vuelven a montar al hacer scroll, y la
+  animación se repetiría). Se anima **el contenedor de la lista una sola vez** en la primera carga (fade + `translateY 8`).
+  Al filtrar, los items se reacomodan con `itemLayoutAnimation` (`LinearTransition` de 200 ms).
 
 ### Botón primario (`GradientButton`)
 - Pill de 56 de alto y ancho completo, con ícono + label en blanco.
 - **Gradiente vivo**: una capa `LinearGradient` más ancha que el botón se traslada en bucle (`translateX`, 6 s, lineal,
   ida y vuelta) dentro de `overflow: hidden`. Es solo `transform`, así que el costo es casi nulo.
 - Press: `scale 0.97` en 120 ms. Con `loading`, el label se cambia por un spinner blanco y el gradiente acelera (2 s).
-- Con movimiento reducido, el gradiente queda estático.
+- Con movimiento reducido, el gradiente queda estático en el tramo central (morado/magenta).
 
 ### Botón secundario / destructivo
 - Secundario: pill `ink` con texto blanco.
@@ -233,8 +234,9 @@ que "flota" sobre una zona negra**.
 
 ## 7. Logo provisional "TT"
 
-- Dos letras **T** superpuestas: la segunda desplazada `+6x, +6y`, con el trazo de la barra horizontal compartido.
-- Relleno con `brandGradient` (SVG con `react-native-svg` + `LinearGradient`).
+- Dos letras **T** iguales y entrelazadas: la delantera desplazada `+16x, +6y`, separada de la trasera por un corte
+  del color de fondo (prop `backgroundColor`).
+- Relleno con **un solo** `brandGradient` continuo en el espacio del SVG (`gradientUnits="userSpaceOnUse"`).
 - Usos: header de Tickets (32 px dentro de un círculo `ink` de 48), estado vacío (64 px) y splash/ícono de la app.
 - El nombre "TicketTracker" va en `heading`, siempre en `textPrimary`; el gradiente se reserva para el monograma.
 
@@ -244,11 +246,11 @@ que "flota" sobre una zona negra**.
 
 | Elemento | Propósito | Técnica | Duración |
 |---|---|---|---|
-| Indicador del navbar | Consistencia espacial | Shared value + `withTiming` | 220 ms, ease-out |
-| Pill del segmented | Indicar estado | Igual que el navbar | 200 ms |
-| Press de cualquier pressable | Feedback | Transición CSS de Reanimated en `scale` | 120 ms |
+| Indicador del navbar | Consistencia espacial | Shared value + `withTiming` | 250 ms, ease-in-out |
+| Pill del segmented | Indicar estado | Igual que el navbar | 250 ms, ease-in-out |
+| Press de cualquier pressable | Feedback | Shared value + `withTiming` en `scale` (`PressableScale`) | 120 ms, ease-out |
 | Gradiente del CTA | Deleite / jerarquía | `translateX` en bucle | 6 s (2 s en loading) |
-| Entrada de cards | Evitar un cambio brusco | `entering` FadeInDown, escalonado | 250 ms |
+| Entrada de la lista | Evitar un cambio brusco | Contenedor con fade + `translateY`, solo la primera carga | 250 ms |
 | Reacomodo al filtrar | Consistencia espacial | `itemLayoutAnimation` LinearTransition | 200 ms |
 | Cambio de estado | Indicar estado | Crossfade de color + haptic de éxito | 200 ms |
 | Eliminar ticket | Feedback | `exiting` FadeOut + haptic Medium | 200 ms |

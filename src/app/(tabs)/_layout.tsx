@@ -1,17 +1,16 @@
 import { Tabs } from 'expo-router';
 import { Plus, Settings, Ticket } from 'lucide-react-native';
 
-import { colors, fonts, sizes } from '@/constants/theme';
+import { TabBar } from '@/components/TabBar';
+import { colors, sizes } from '@/constants/theme';
 
-// TabBar nativo provisional; en H3 se reemplaza por el navbar flotante animado.
 export default function TabsLayout() {
   return (
     <Tabs
+      tabBar={(props) => <TabBar {...props} />}
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: colors.purple,
-        tabBarInactiveTintColor: colors.textSecondary,
-        tabBarLabelStyle: { fontFamily: fonts.medium },
+        animation: 'none',
         sceneStyle: { backgroundColor: colors.canvas },
       }}>
       <Tabs.Screen
@@ -26,7 +25,7 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="create"
         options={{
-          title: 'Nuevo',
+          title: 'Nuevo ticket',
           tabBarIcon: ({ color }) => (
             <Plus color={color} size={sizes.icon} strokeWidth={sizes.iconStroke} />
           ),

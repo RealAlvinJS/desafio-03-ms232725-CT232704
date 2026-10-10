@@ -6,6 +6,44 @@ Se actualiza al cerrar cada hito, junto con su commit. Los hitos están definido
 
 ---
 
+## [H3] Navegación y componentes base — 2026-10-09
+
+### Agregado
+- Layout raíz con `GestureHandlerRootView` y `SQLiteProvider`, que corre `migrateDatabase` al abrir la base.
+- `TabBar` flotante: pill con 3 ítems circulares e indicador con anillo de gradiente que se desliza (250 ms, ease-in-out) + `Haptics.selectionAsync()` al cambiar.
+  El contenedor se adapta a la zona (oscuro sobre el listado, gris translúcido sobre pantallas claras). `useTabBarInset()` da el espacio que deben reservar las pantallas.
+- `PressableScale`: base de todo lo presionable (escala 0.97 en 120 ms al presionar, `hitSlop` hasta 44 pt).
+- `GradientButton` (CTA con gradiente vivo y estado de carga), `Button` (secundario / destructivo), `IconButton`, `Badge` de estado, `LoadingSpinner`, `StateMessage` (vacío / error con "Reintentar") y `Logo` TT.
+- Tokens nuevos: `motion.indicator`, `motion.easeInOut` y `navbar`.
+
+### Decisiones
+- Navbar propio en lugar de `NativeTabs`: el diseño flotante con indicador no se logra con el nativo. Las tabs no animan su contenido (`animation: 'none'`).
+- El press usa shared value + `withTiming` en lugar de transiciones CSS: Reanimated 4.5 no acepta `cubic-bezier()` como string y los tipos de estilo de RN 0.86 chocan con su helper `cubicBezier`.
+- **Corrección a DESIGN.md**: no se usa `entering` en filas del FlatList (se re-dispara al hacer scroll); en H4 se anima el contenedor una sola vez y se usa `itemLayoutAnimation` para reacomodos.
+- Los indicadores (navbar y segmented) usan ease-in-out a 250 ms, porque se desplazan en pantalla en vez de entrar o salir (receta de `animate-expo`).
+- Con movimiento reducido, el gradiente se fija en el tramo morado/magenta en lugar del azul inicial.
+- Logo rediseñado: dos T del mismo tamaño, un solo gradiente continuo y un corte dibujado detrás de la T delantera para no adelgazarla.
+- Regla de lint `import/no-named-as-default-member` desactivada para conservar `axios.create`, tal como lo muestra el enunciado.
+
+### Problemas
+- `StyleSheet.absoluteFillObject` ya no existe en RN 0.86 → insets explícitos.
+- `expo start --ios` agotó el tiempo al abrir `exp://` en el primer arranque del simulador; se resolvió levantando Metro y abriendo la URL por separado.
+- Las capturas del simulador a veces muestran el frame anterior: se espera 1–2 s antes de capturar.
+
+### Verificado
+- `npm run check` sin errores.
+- En el simulador iOS (iPhone 17 Pro, Expo Go SDK 57):
+  - SQLite migra dentro de la app y lista los 6 departamentos.
+  - El navbar cambia de tab con el indicador deslizándose y el contenido no se anima.
+  - El gradiente del CTA se desplaza y el estado de carga muestra el spinner.
+  - Con movimiento reducido activo, dos capturas separadas 3 s son idénticas.
+  - `detail/1` recibe el parámetro y el navbar no aparece en el detalle.
+
+### Pendiente
+- Las pantallas de tabs muestran una vitrina temporal de componentes (se reemplaza en H4–H7).
+
+---
+
 ## [H2] Backend y capa de servicios — 2026-10-09
 
 ### Agregado

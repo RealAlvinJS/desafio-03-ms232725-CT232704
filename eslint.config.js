@@ -13,6 +13,8 @@ module.exports = defineConfig([
     rules: {
       '@typescript-eslint/no-explicit-any': 'error',
       'no-console': ['warn', { allow: ['warn', 'error'] }],
+      // axios.create es la forma documentada en el enunciado del desafío.
+      'import/no-named-as-default-member': 'off',
     },
   },
 ]);

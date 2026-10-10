@@ -85,8 +85,7 @@ export const sizes = {
 export const motion = {
   press: 120,
   chip: 150,
-  segmented: 200,
-  navbar: 220,
+  indicator: 250,
   enter: 250,
   emptyState: 300,
   staggerStep: 40,
@@ -95,8 +94,16 @@ export const motion = {
   gradientLoopLoading: 2000,
   pressScale: 0.97,
   enterScale: 0.95,
-  // Curva ease-out fuerte: arranca rápido y frena suave, ideal para respuestas a input.
+  // ease-out para lo que entra o responde al dedo; ease-in-out para lo que se desplaza en pantalla.
   easeOut: [0.23, 1, 0.32, 1],
+  easeInOut: [0.77, 0, 0.175, 1],
+} as const;
+
+export const navbar = {
+  padding: 6,
+  gap: 8,
+  bottomOffset: 16,
+  ringWidth: 2,
 } as const;
 
 export const shadows = {
