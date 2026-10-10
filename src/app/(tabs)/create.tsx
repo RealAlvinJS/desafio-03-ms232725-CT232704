@@ -26,7 +26,7 @@ export default function CreateTicketScreen() {
           variant="error"
           title="Sin conexión"
           message="No hay conexión con el servidor."
-          onRetry={() => undefined}
+          action={{ label: 'Reintentar', onPress: () => undefined }}
         />
       </View>
     </ScreenPlaceholder>

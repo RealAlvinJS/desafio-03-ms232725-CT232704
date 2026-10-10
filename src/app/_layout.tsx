@@ -15,6 +15,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import { DATABASE_NAME } from '@/constants/config';
 import { colors } from '@/constants/theme';
+import { TicketsProvider } from '@/context/TicketsContext';
 import { migrateDatabase } from '@/db/database';
 
 SplashScreen.preventAutoHideAsync();
@@ -43,15 +44,17 @@ export default function RootLayout() {
   return (
     <GestureHandlerRootView style={styles.root}>
       <SQLiteProvider databaseName={DATABASE_NAME} onInit={migrateDatabase}>
-        <StatusBar style="dark" />
-        <Stack
-          screenOptions={{
-            headerShown: false,
-            contentStyle: { backgroundColor: colors.canvas },
-          }}>
-          <Stack.Screen name="(tabs)" />
-          <Stack.Screen name="detail/[id]" />
-        </Stack>
+        <TicketsProvider>
+          <StatusBar style="dark" />
+          <Stack
+            screenOptions={{
+              headerShown: false,
+              contentStyle: { backgroundColor: colors.canvas },
+            }}>
+            <Stack.Screen name="(tabs)" />
+            <Stack.Screen name="detail/[id]" />
+          </Stack>
+        </TicketsProvider>
       </SQLiteProvider>
     </GestureHandlerRootView>
   );

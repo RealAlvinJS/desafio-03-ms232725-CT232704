@@ -9,7 +9,8 @@ interface IconButtonProps {
   icon: LucideIcon;
   accessibilityLabel: string;
   onPress: () => void;
-  tone?: 'light' | 'dark';
+  // light: sobre canvas · muted: sobre superficies blancas · dark: sobre la zona negra.
+  tone?: 'light' | 'muted' | 'dark';
   iconColor?: string;
 }
 
@@ -26,7 +27,7 @@ export function IconButton({
     <PressableScale
       onPress={onPress}
       accessibilityLabel={accessibilityLabel}
-      style={[styles.button, isDark ? styles.dark : styles.light]}>
+      style={[styles.button, styles[tone]]}>
       <Icon
         color={iconColor ?? (isDark ? colors.textOnDark : colors.textPrimary)}
         size={sizes.icon}
@@ -46,6 +47,9 @@ const styles = StyleSheet.create({
   },
   light: {
     backgroundColor: colors.surface,
+  },
+  muted: {
+    backgroundColor: colors.surfaceMuted,
   },
   dark: {
     backgroundColor: colors.ink3,

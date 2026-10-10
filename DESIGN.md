@@ -203,12 +203,14 @@ que "flota" sobre una zona negra**.
 - Press: `scale 0.97` en 120 ms. Con `loading`, el label se cambia por un spinner blanco y el gradiente acelera (2 s).
 - Con movimiento reducido, el gradiente queda estático en el tramo central (morado/magenta).
 
-### Botón secundario / destructivo
-- Secundario: pill `ink` con texto blanco.
+### Botón secundario / inverso / destructivo
+- Secundario: pill `ink` con texto blanco (fondos claros).
+- Inverso: pill `surface` con texto `ink` (zona negra; p. ej. "Reintentar" en el listado).
 - Destructivo: pill outline `red` con texto `red`; siempre pasa por un `Alert` de confirmación.
 
 ### Botón circular (`IconButton`)
-- 48×48, `surface` sobre claro o `ink3` sobre negro, ícono de 22 con trazo de 1.75.
+- 48×48, ícono de 22 con trazo de 1.75. Tonos: `light` (`surface`, sobre canvas), `muted` (`surfaceMuted`, sobre
+  superficies blancas como el header del listado) y `dark` (`ink3`, sobre negro).
 
 ### Input (`CustomInput`)
 - Pill de 56 (multilínea: radio `md`, mínimo 120 de alto) con fondo `surface`.

@@ -1,4 +1,4 @@
-import { RotateCw, TriangleAlert } from 'lucide-react-native';
+import { TriangleAlert, type LucideIcon } from 'lucide-react-native';
 import { StyleSheet, Text } from 'react-native';
 import Animated, { FadeIn, ZoomIn } from 'react-native-reanimated';
 
@@ -12,7 +12,11 @@ interface StateMessageProps {
   title: string;
   message: string;
   tone?: 'light' | 'dark';
-  onRetry?: () => void;
+  action?: {
+    label: string;
+    icon?: LucideIcon;
+    onPress: () => void;
+  };
 }
 
 const LOGO_SIZE = 64;
@@ -29,7 +33,7 @@ export function StateMessage({
   title,
   message,
   tone = 'light',
-  onRetry,
+  action,
 }: StateMessageProps) {
   const isDark = tone === 'dark';
   const background = isDark ? colors.ink : colors.canvas;
@@ -52,7 +56,14 @@ export function StateMessage({
         {message}
       </Text>
 
-      {onRetry && <Button label="Reintentar" icon={RotateCw} onPress={onRetry} />}
+      {action && (
+        <Button
+          label={action.label}
+          icon={action.icon}
+          variant={isDark ? 'inverse' : 'secondary'}
+          onPress={action.onPress}
+        />
+      )}
     </Animated.View>
   );
 }

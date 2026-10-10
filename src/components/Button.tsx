@@ -5,7 +5,8 @@ import { colors, radii, sizes, spacing, typography } from '@/constants/theme';
 
 import { PressableScale } from './PressableScale';
 
-type ButtonVariant = 'secondary' | 'destructive';
+// secondary: negro sobre fondos claros · inverse: blanco sobre la zona negra.
+type ButtonVariant = 'secondary' | 'inverse' | 'destructive';
 
 interface ButtonProps {
   label: string;
@@ -17,6 +18,7 @@ interface ButtonProps {
 
 const VARIANT_COLORS: Record<ButtonVariant, { text: string }> = {
   secondary: { text: colors.textOnDark },
+  inverse: { text: colors.textPrimary },
   destructive: { text: colors.red },
 };
 
@@ -54,6 +56,9 @@ const styles = StyleSheet.create({
   },
   secondary: {
     backgroundColor: colors.ink,
+  },
+  inverse: {
+    backgroundColor: colors.surface,
   },
   destructive: {
     borderWidth: 1.5,

@@ -6,6 +6,48 @@ Se actualiza al cerrar cada hito, junto con su commit. Los hitos están definido
 
 ---
 
+## [H4] Estado global y listado (GET) — 2026-10-09
+
+### Agregado
+- `TicketsContext` (`useReducer` + `use()` de React 19) con `fetchTickets`, `addTicket`, `editTicket` y `removeTicket`.
+  - Arranque cache-first: pinta la caché de SQLite y luego la reemplaza con `GET /tickets`.
+  - Si el GET falla con caché → `isOffline`; sin caché → estado de error.
+  - Las mutaciones actualizan el estado y la caché con la respuesta del servidor y lanzan errores ya traducidos.
+- Pantalla Tickets con composición split:
+  - Header blanco con logo, nombre, botón de ajustes y dos stat cards con gradiente (Abiertos / Alta prioridad), que funcionan como filtros rápidos.
+  - Zona negra con `SegmentedControl` de estado, `FilterChips` de prioridad, título con contador "N de M" y FlatList de `ItemCard`.
+- Estados explícitos: carga, error con "Reintentar", sin tickets, sin resultados con "Limpiar filtros" y banner "Sin conexión".
+- Pull-to-refresh, orden por prioridad y luego por fecha, y navegación a `detail/[id]` con el id por parámetro.
+- `utils/tickets.ts` (`sortTickets`, `filterTickets`, `countBy`) y `utils/format.ts` (fecha relativa y completa con `Intl` creado una sola vez).
+- Componentes nuevos: `SegmentedControl`, `FilterChips`, `ItemCard`, `StatCard` y `OfflineBanner`; variante `inverse` en `Button` y tono `muted` en `IconButton`.
+
+### Decisiones
+- La lista entra una sola vez (fade + `translateY` en el contenedor) y los filtros reacomodan con `itemLayoutAnimation`; no hay `entering` por fila.
+- Los stat cards alternan su filtro (tocar uno activo lo quita) y muestran una X cuando están activos.
+- El segmented en la zona negra usa pill blanco con texto oscuro; en zonas claras, pill negro con texto blanco.
+- `StateMessage` recibe una `action` genérica (etiqueta + ícono + handler) en lugar de un `onRetry` fijo.
+- Contadores de los stat cards sobre todos los tickets, para que coincidan con lo que muestra el filtro al tocarlos.
+
+### Problemas
+- Los stat cards colapsaban: el `flex: 1` estaba en la vista interna del `Pressable` y no en un contenedor; se envolvieron en un `View` flexible.
+- "Reintentar" era invisible (pill negro sobre la zona negra) → variante `inverse`.
+- Un error transitorio "useTickets debe usarse dentro de TicketsProvider" apareció solo durante la recarga en caliente, mientras `index` y `_layout` se guardaban por separado.
+
+### Verificado
+- `npm run check` sin errores.
+- En el simulador iOS:
+  - Se ven los 12 tickets de MockAPI ordenados por prioridad.
+  - El stat card "Abiertos" filtra 6 de 12 y mueve el segmented; combinado con "Media" quedan 2, ordenados por fecha.
+  - La card abre `detail/8`.
+- Modo sin conexión: con un proxy local hacia MockAPI se cargó la caché, se apagó el proxy y al reabrir la app aparecen los 12 tickets con el banner "Sin conexión".
+- Estado de error: con una URL sin caché ni servidor se muestra "No se pudieron cargar los tickets" con el mensaje traducido y "Reintentar".
+
+### Pendiente
+- El spinner del pull-to-refresh no se alcanzó a ver en captura (el gesto sí responde); revisarlo en la demo.
+- "Sin resultados" no es alcanzable con el seed actual (todas las combinaciones tienen tickets); se revisará con `break-ui` en H8.
+
+---
+
 ## [H3] Navegación y componentes base — 2026-10-09
 
 ### Agregado
