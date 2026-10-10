@@ -31,6 +31,7 @@ interface GradientButtonProps {
   icon?: LucideIcon;
   loading?: boolean;
   disabled?: boolean;
+  height?: number;
 }
 
 // La capa de gradiente mide el triple del botón y se desplaza: solo transform, sin costo de layout.
@@ -42,6 +43,7 @@ export function GradientButton({
   icon: Icon,
   loading = false,
   disabled = false,
+  height = sizes.button,
 }: GradientButtonProps) {
   const [width, setWidth] = useState(0);
   const translateX = useSharedValue(0);
@@ -87,7 +89,7 @@ export function GradientButton({
       onPress={onPress}
       disabled={isInactive}
       accessibilityLabel={label}
-      style={[styles.button, disabled && styles.disabled]}>
+      style={[styles.button, { height }, disabled && styles.disabled]}>
       <View style={StyleSheet.absoluteFill} onLayout={handleLayout}>
         <Animated.View
           style={[styles.gradientLayer, { width: width * GRADIENT_SCALE }, gradientStyle]}>
@@ -107,7 +109,9 @@ export function GradientButton({
           {Icon && (
             <Icon color={colors.textOnDark} size={sizes.icon} strokeWidth={sizes.iconStroke} />
           )}
-          <Text style={styles.label}>{label}</Text>
+          <Text style={styles.label} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>
+            {label}
+          </Text>
         </View>
       )}
     </PressableScale>
@@ -116,7 +120,6 @@ export function GradientButton({
 
 const styles = StyleSheet.create({
   button: {
-    height: sizes.button,
     borderRadius: radii.pill,
     overflow: 'hidden',
     alignItems: 'center',
@@ -133,6 +136,8 @@ const styles = StyleSheet.create({
     left: 0,
   },
   content: {
+    flexShrink: 1,
+    paddingHorizontal: spacing.md,
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.xs,

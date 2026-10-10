@@ -103,7 +103,8 @@ export const motion = {
 export const navbar = {
   padding: 6,
   gap: 8,
-  bottomOffset: 16,
+  // Cuánto se mete la isla en la zona del indicador de inicio para quedar más cerca del borde.
+  homeIndicatorOverlap: 14,
   ringWidth: 2,
 } as const;
 

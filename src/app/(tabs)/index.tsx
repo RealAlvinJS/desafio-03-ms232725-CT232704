@@ -14,7 +14,7 @@ import { OfflineBanner } from '@/components/OfflineBanner';
 import { SegmentedControl, type SegmentOption } from '@/components/SegmentedControl';
 import { StatCard } from '@/components/StatCard';
 import { StateMessage } from '@/components/StateMessage';
-import { useTabBarInset } from '@/components/TabBar';
+import { useTabBarInset } from '@/components/FloatingNav';
 import { PRIORITIES, PRIORITY_META, STATUSES, STATUS_META } from '@/constants/tickets';
 import { colors, gradients, motion, radii, sizes, spacing, typography } from '@/constants/theme';
 import { useTickets } from '@/context/TicketsContext';

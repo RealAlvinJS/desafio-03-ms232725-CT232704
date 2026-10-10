@@ -6,6 +6,33 @@ Se actualiza al cerrar cada hito, junto con su commit. Los hitos están definido
 
 ---
 
+## [H5.2] Isla de navegación con extensiones — 2026-10-09
+
+### Agregado
+- `FloatingNav`: la barra pasa a ser una **isla global** en el layout raíz (reemplaza a `TabBar`), visible también en rutas apiladas como el detalle.
+- `NavActionsContext` + `useNavActions`: cada pantalla publica, mientras está enfocada, un botón **atrás** (izquierda) y una **acción principal** (derecha, con gradiente vivo) que se integran como extensiones de la isla.
+- Atrás automático en rutas apiladas (`router.back()`), sin que la pantalla tenga que declararlo.
+- `GradientButton` acepta `height` y ajusta el texto en espacios angostos.
+
+### Decisiones
+- La isla se apoya 14 pt dentro de la zona del indicador de inicio (antes quedaba 16 pt por encima del safe area): unos 30 pt más abajo.
+- El formulario por pasos ya no tiene botones propios: "Atrás" y "Siguiente"/"Crear ticket" viven en la isla.
+- El registro de acciones guarda un "dueño" por pantalla: al cambiar de pantalla, la que sale no puede borrar las acciones de la que entra. Los handlers se leen siempre de la última versión, así que no se re-publica en cada render.
+- Posicionamiento **determinista**: se calcula el `left` de la isla según qué extensiones hay y se anima con un shared value. Las extensiones derivan su posición de ese valor.
+
+### Problemas
+- La primera versión usaba `LinearTransition` (layout animation) para reacomodar la fila: la isla no se movía y "Siguiente" quedaba encima. Se reemplazó por el cálculo explícito.
+
+### Verificado
+- `npm run check` sin errores.
+- En el simulador:
+  - Nuevo, paso 1: la isla se ancla a la izquierda y "Siguiente" ocupa el resto.
+  - Paso 2: "Atrás" entra desde la isla mientras ésta se desplaza (capturado a mitad de animación).
+  - Al cambiar a Tickets, las extensiones salen y la isla vuelve al centro.
+  - En el detalle aparece "Atrás" automático, sin tab activa, y al pulsarlo vuelve al listado.
+
+---
+
 ## [H5.1] Formulario por pasos — 2026-10-09
 
 ### Agregado

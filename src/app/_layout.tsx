@@ -13,9 +13,11 @@ import { useEffect } from 'react';
 import { StyleSheet } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
+import { FloatingNav } from '@/components/FloatingNav';
 import { DATABASE_NAME } from '@/constants/config';
 import { colors } from '@/constants/theme';
 import { DepartmentsProvider } from '@/context/DepartmentsContext';
+import { NavActionsProvider } from '@/context/NavActionsContext';
 import { TicketsProvider } from '@/context/TicketsContext';
 import { migrateDatabase } from '@/db/database';
 
@@ -47,15 +49,18 @@ export default function RootLayout() {
       <SQLiteProvider databaseName={DATABASE_NAME} onInit={migrateDatabase}>
         <TicketsProvider>
           <DepartmentsProvider>
-            <StatusBar style="dark" />
-            <Stack
-              screenOptions={{
-                headerShown: false,
-                contentStyle: { backgroundColor: colors.canvas },
-              }}>
-              <Stack.Screen name="(tabs)" />
-              <Stack.Screen name="detail/[id]" />
-            </Stack>
+            <NavActionsProvider>
+              <StatusBar style="dark" />
+              <Stack
+                screenOptions={{
+                  headerShown: false,
+                  contentStyle: { backgroundColor: colors.canvas },
+                }}>
+                <Stack.Screen name="(tabs)" />
+                <Stack.Screen name="detail/[id]" />
+              </Stack>
+              <FloatingNav />
+            </NavActionsProvider>
           </DepartmentsProvider>
         </TicketsProvider>
       </SQLiteProvider>

@@ -1,8 +1,7 @@
 import * as Haptics from 'expo-haptics';
-import { LinearGradient } from 'expo-linear-gradient';
 import { router, useFocusEffect } from 'expo-router';
 import { setStatusBarStyle } from 'expo-status-bar';
-import { ArrowLeft, ArrowRight, Plus, Settings } from 'lucide-react-native';
+import { ArrowRight, Plus, Settings } from 'lucide-react-native';
 import { useCallback, useRef, useState, type ReactNode } from 'react';
 import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
 import Animated, { FadeIn, FadeInLeft, FadeInRight } from 'react-native-reanimated';
@@ -12,14 +11,14 @@ import { Button } from '@/components/Button';
 import { ChoiceCard } from '@/components/ChoiceCard';
 import { CustomInput, FieldError } from '@/components/CustomInput';
 import { FilterChips, type ChipOption } from '@/components/FilterChips';
-import { GradientButton } from '@/components/GradientButton';
 import { StepProgress } from '@/components/StepProgress';
-import { useTabBarInset } from '@/components/TabBar';
+import { useTabBarInset } from '@/components/FloatingNav';
 import { TicketReview } from '@/components/TicketReview';
 import { TopInsetCover } from '@/components/TopInsetCover';
 import { PRIORITIES, PRIORITY_DESCRIPTIONS, PRIORITY_META } from '@/constants/tickets';
-import { colors, motion, radii, sizes, spacing, typography } from '@/constants/theme';
+import { colors, motion, radii, spacing, typography } from '@/constants/theme';
 import { useDepartments } from '@/context/DepartmentsContext';
+import { useNavActions } from '@/context/NavActionsContext';
 import { useTickets } from '@/context/TicketsContext';
 import {
   EMPTY_TICKET_FORM,
@@ -60,8 +59,6 @@ const STEPS: readonly Step[] = [
 ];
 
 const LAST_STEP = STEPS.length - 1;
-// Barra de acciones fija sobre el navbar: el contenido reserva su alto para no quedar tapado.
-const ACTIONS_HEIGHT = sizes.button + spacing.xl * 2;
 
 // Avanzar entra desde la derecha y retroceder desde la izquierda: el paso se siente como un recorrido.
 const enterForward = FadeInRight.duration(motion.enter);
@@ -138,8 +135,9 @@ export default function CreateTicketScreen() {
   };
 
   const handleBack = () => {
-    Haptics.selectionAsync();
-    goToStep(step - 1);
+    if (!isSaving) {
+      goToStep(step - 1);
+    }
   };
 
   const resetForm = () => {
@@ -177,6 +175,15 @@ export default function CreateTicketScreen() {
       setIsSaving(false);
     }
   };
+
+  // Atrás y Siguiente/Crear viven en la isla de navegación, no en el contenido.
+  useNavActions({
+    back: step > 0 ? { label: 'Paso anterior', onPress: handleBack } : undefined,
+    primary:
+      step < LAST_STEP
+        ? { label: 'Siguiente', icon: ArrowRight, onPress: handleNext }
+        : { label: 'Crear ticket', icon: Plus, onPress: handleCreate, loading: isSaving },
+  });
 
   const renderStepContent = () => {
     switch (step) {
@@ -282,7 +289,7 @@ export default function CreateTicketScreen() {
         keyboardDismissMode="interactive"
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={[styles.content, { paddingBottom: tabBarInset + ACTIONS_HEIGHT }]}>
+        contentContainerStyle={[styles.content, { paddingBottom: tabBarInset }]}>
         <View style={[styles.header, { paddingTop: insets.top + spacing.md }]}>
           <View style={styles.headerTop}>
             <Text style={styles.screenTitle}>Nuevo ticket</Text>
@@ -305,31 +312,6 @@ export default function CreateTicketScreen() {
         </Animated.View>
       </ScrollView>
 
-      <View pointerEvents="box-none" style={[styles.actionsBar, { paddingBottom: tabBarInset }]}>
-        <LinearGradient
-          pointerEvents="none"
-          colors={[colors.canvasTransparent, colors.canvas]}
-          locations={[0, 0.2]}
-          style={StyleSheet.absoluteFill}
-        />
-        <View style={styles.actions}>
-          {step > 0 && (
-            <Button label="Atrás" icon={ArrowLeft} onPress={handleBack} disabled={isSaving} />
-          )}
-          <View style={styles.primaryAction}>
-            {step < LAST_STEP ? (
-              <GradientButton label="Siguiente" icon={ArrowRight} onPress={handleNext} />
-            ) : (
-              <GradientButton
-                label="Crear ticket"
-                icon={Plus}
-                loading={isSaving}
-                onPress={handleCreate}
-              />
-            )}
-          </View>
-        </View>
-      </View>
       <TopInsetCover color={colors.ink} />
     </View>
   );
@@ -402,20 +384,5 @@ const styles = StyleSheet.create({
   emptyText: {
     ...typography.body,
     color: colors.textSecondary,
-  },
-  actionsBar: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    bottom: 0,
-    paddingTop: spacing.xl,
-  },
-  actions: {
-    flexDirection: 'row',
-    gap: spacing.sm,
-    paddingHorizontal: spacing.gutter,
-  },
-  primaryAction: {
-    flex: 1,
   },
 });

@@ -171,7 +171,7 @@ cuerpo `canvas`. Así las tabs se reconocen como familia y cada una tiene su pro
 | 4 | Revisa y crea | `TicketReview`: resumen por secciones con "Editar" que salta al paso exacto |
 
 - Header: "Nuevo ticket" + "Paso N de 4", `StepProgress` (un segmento por paso, se llena con gradiente) y título/subtítulo del paso.
-- Barra de acciones **fija** sobre el navbar, con un degradado de `canvas` transparente a sólido: "Atrás" (secundario) + "Siguiente"/"Crear ticket" (gradiente).
+- "Atrás" (desde el paso 2) y "Siguiente"/"Crear ticket" son **extensiones de la isla**, no botones dentro del contenido.
 - "Siguiente" solo valida los campos del paso actual; los errores aparecen tras el primer intento en ese paso.
 - La barra de estado se pone clara mientras la tab está enfocada (header negro).
 
@@ -179,13 +179,16 @@ cuerpo `canvas`. Así las tabs se reconocen como familia y cada una tiene su pro
 
 ## 6. Componentes
 
-### Navbar flotante (`(tabs)/_layout.tsx`, `tabBar` personalizado)
-- Contenedor pill: `ink` sobre la zona negra y gris translúcido (`#0A0A0A` al 55 %) sobre pantallas claras, como en la referencia.
-- Ítems circulares de 52; los inactivos en `ink3` con el ícono en `textOnDarkMuted`.
-- **Activo**: un círculo `ink` con **anillo de 2 px en `brandGradient`** que **se desliza** hasta la nueva tab
-  (250 ms, ease-in-out porque se desplaza en pantalla; es un indicador absoluto). El ícono activo es blanco.
-- Al cambiar de tab: `Haptics.selectionAsync()`. El contenido de la pantalla **no** se anima.
-- Separado 16 del borde inferior y respetando el safe area.
+### Isla de navegación (`FloatingNav`, global)
+- Vive en el layout raíz, por encima de todas las rutas (tabs y pantallas apiladas). Las tabs usan `tabBar={() => null}`.
+- **Isla**: pill con 3 ítems circulares de 52; activo con anillo `brandGradient` que se desliza (250 ms, ease-in-out). En rutas que no son tab, el indicador se oculta.
+  Fondo `ink2` sobre la zona negra del listado y gris translúcido sobre pantallas claras.
+- **Extensiones** (se registran con `useNavActions` mientras la pantalla está enfocada):
+  - **Atrás** (izquierda): círculo `ink` de 64. Aparece cuando la pantalla lo define (p. ej. pasos del formulario) o, automáticamente, en rutas apiladas (`router.back()`).
+  - **Acción principal** (derecha): `GradientButton` con gradiente vivo, ocupa todo el ancho restante.
+- Posición determinista: la isla se centra con sus extensiones y, si hay acción principal, se ancla a la izquierda. El desplazamiento se anima con un shared value (250 ms, ease-in-out); las extensiones entran con fade + deslizamiento desde la isla y salen igual.
+- Se apoya más cerca del indicador de inicio (`navbar.homeIndicatorOverlap`). `useTabBarInset()` da el espacio que debe reservar el contenido.
+- Haptic de selección al cambiar de tab o al pulsar atrás.
 
 ### Segmented control (filtro de estado / selector de prioridad)
 - Contenedor pill `surface` (o `ink2` en la zona negra), opciones `label`.
@@ -281,6 +284,7 @@ cuerpo `canvas`. Así las tabs se reconocen como familia y cada una tiene su pro
 | Elemento | Propósito | Técnica | Duración |
 |---|---|---|---|
 | Indicador del navbar | Consistencia espacial | Shared value + `withTiming` | 250 ms, ease-in-out |
+| Extensiones de la isla | Consistencia espacial | Fade + deslizamiento desde la isla; la isla se reubica con shared value | 250 ms |
 | Pill del segmented | Indicar estado | Igual que el navbar | 250 ms, ease-in-out |
 | Press de cualquier pressable | Feedback | Shared value + `withTiming` en `scale` (`PressableScale`) | 120 ms, ease-out |
 | Gradiente del CTA | Deleite / jerarquía | `translateX` en bucle | 6 s (2 s en loading) |

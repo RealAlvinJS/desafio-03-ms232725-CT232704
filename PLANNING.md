@@ -58,7 +58,8 @@ src/
 │   └── ticketCacheRepository.ts ➕ readAll, replaceAll, upsert, remove (SQL)
 ├── context/
 │   ├── TicketsContext.tsx       ➕ Estado global del listado (useReducer) + caché
-│   └── DepartmentsContext.tsx   ➕ Departamentos editables desde SQLite
+│   ├── DepartmentsContext.tsx   ➕ Departamentos editables desde SQLite
+│   └── NavActionsContext.tsx    ➕ Acciones que cada pantalla publica en la isla
 ├── components/
 │   ├── ItemCard.tsx             ✅ Tarjeta del ticket en el FlatList
 │   ├── CustomInput.tsx          ✅ Input con label + mensaje de error
@@ -68,7 +69,7 @@ src/
 │   ├── Badge.tsx                ➕ Badge de estado (outline + ícono)
 │   ├── GradientButton.tsx       ➕ CTA primario con gradiente animado
 │   ├── IconButton.tsx           ➕ Botón circular
-│   ├── TabBar.tsx               ➕ Navbar flotante con indicador animado
+│   ├── FloatingNav.tsx          ➕ Isla de navegación global con extensiones atrás / acción
 │   ├── Logo.tsx                 ➕ Monograma TT con gradiente (SVG)
 │   └── StateMessage.tsx         ➕ Estado vacío / error de red con botón "Reintentar"
 ├── types/
