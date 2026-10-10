@@ -95,6 +95,11 @@ function toFriendlyError(error: unknown): Error {
   return new Error(getErrorMessage(error));
 }
 
+// La caché es auxiliar: si SQLite falla, la app sigue con los datos del servidor.
+function reportCacheError(error: unknown): void {
+  console.warn('No se pudo actualizar la caché local de tickets.', error);
+}
+
 const TicketsContext = createContext<TicketsContextValue | null>(null);
 
 export function TicketsProvider({ children }: { children: ReactNode }) {
@@ -104,13 +109,15 @@ export function TicketsProvider({ children }: { children: ReactNode }) {
   const fetchTickets = useCallback(
     async ({ refreshing = false }: { refreshing?: boolean } = {}) => {
       dispatch({ type: 'fetch_started', refreshing });
+      let tickets: Ticket[];
       try {
-        const tickets = await getItems();
-        dispatch({ type: 'fetch_succeeded', tickets });
-        await replaceCachedTickets(db, getBaseUrl(), tickets);
+        tickets = await getItems();
       } catch (error) {
         dispatch({ type: 'fetch_failed', error: getErrorMessage(error) });
+        return;
       }
+      dispatch({ type: 'fetch_succeeded', tickets });
+      replaceCachedTickets(db, getBaseUrl(), tickets).catch(reportCacheError);
     },
     [db],
   );
@@ -125,6 +132,7 @@ export function TicketsProvider({ children }: { children: ReactNode }) {
           dispatch({ type: 'cache_loaded', tickets: cached });
         }
       })
+      .catch(reportCacheError)
       .finally(() => {
         if (isActive) {
           fetchTickets();
@@ -138,28 +146,30 @@ export function TicketsProvider({ children }: { children: ReactNode }) {
 
   const addTicket = useCallback(
     async (input: TicketInput) => {
+      let ticket: Ticket;
       try {
-        const ticket = await createItem(input);
-        dispatch({ type: 'ticket_saved', ticket });
-        await upsertCachedTicket(db, getBaseUrl(), ticket);
-        return ticket;
+        ticket = await createItem(input);
       } catch (error) {
         throw toFriendlyError(error);
       }
+      dispatch({ type: 'ticket_saved', ticket });
+      upsertCachedTicket(db, getBaseUrl(), ticket).catch(reportCacheError);
+      return ticket;
     },
     [db],
   );
 
   const editTicket = useCallback(
     async (id: string, changes: TicketUpdate) => {
+      let ticket: Ticket;
       try {
-        const ticket = await updateItem(id, changes);
-        dispatch({ type: 'ticket_saved', ticket });
-        await upsertCachedTicket(db, getBaseUrl(), ticket);
-        return ticket;
+        ticket = await updateItem(id, changes);
       } catch (error) {
         throw toFriendlyError(error);
       }
+      dispatch({ type: 'ticket_saved', ticket });
+      upsertCachedTicket(db, getBaseUrl(), ticket).catch(reportCacheError);
+      return ticket;
     },
     [db],
   );
@@ -168,11 +178,11 @@ export function TicketsProvider({ children }: { children: ReactNode }) {
     async (id: string) => {
       try {
         await deleteItem(id);
-        dispatch({ type: 'ticket_removed', id });
-        await deleteCachedTicket(db, id);
       } catch (error) {
         throw toFriendlyError(error);
       }
+      dispatch({ type: 'ticket_removed', id });
+      deleteCachedTicket(db, id).catch(reportCacheError);
     },
     [db],
   );

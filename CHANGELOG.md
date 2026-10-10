@@ -6,6 +6,42 @@ Se actualiza al cerrar cada hito, junto con su commit. Los hitos están definido
 
 ---
 
+## [H5.1] Formulario por pasos — 2026-10-09
+
+### Agregado
+- `create.tsx` rediseñado como formulario de 4 pasos con composición **split invertido** (header negro redondeado sobre canvas), en la misma línea que el home:
+  1. Problema · 2. Clasificación · 3. Asignación · 4. Revisión.
+- `StepProgress`: barra segmentada que se llena con el gradiente de marca.
+- `ChoiceCard`: prioridad como tarjetas grandes con la descripción de cada urgencia (`PRIORITY_DESCRIPTIONS`).
+- `TicketReview`: resumen final con "Editar" por sección que vuelve al paso exacto.
+- `EvidenceImage`: miniatura de evidencia con estado de error ("No se pudo cargar la evidencia").
+- Barra de acciones fija (Atrás / Siguiente / Crear ticket) sobre el navbar, con degradado de canvas.
+- `pickErrors` en validación para mostrar solo los errores del paso actual.
+
+### Decisiones
+- Transición entre pasos según la dirección: al avanzar el contenido entra desde la derecha y al retroceder desde la izquierda; el título del paso hace fade.
+- "Siguiente" valida solo los campos del paso; el envío final vuelve a validar todo el formulario.
+- La barra de estado cambia a clara mientras la tab "Nuevo" está enfocada (`useFocusEffect`).
+- Las escrituras en la caché de SQLite pasan a ser *best-effort*: si fallan se registran y no rompen la operación ni la UI, porque MockAPI es la fuente de verdad.
+
+### Problemas
+- **Errores "Access to closed resource" de SQLite** al recargar la app: había promesas de la caché sin capturar cuando la base se cerraba durante la recarga. Ahora todas las promesas de la caché y de los departamentos tienen `catch`.
+- La primera versión de la barra de acciones dejaba ver tarjetas entre los botones y el navbar; se extendió hasta el borde inferior.
+- En el simulador, escribir "Torres" con el input sin foco disparó el atajo **R-R** (recargar) de React Native: era un problema de la prueba, no de la app.
+- La herramienta del simulador cortó una URL larga al escribirla; gracias a eso se validó el estado de error de `EvidenceImage` (404 → mensaje).
+
+### Verificado
+- `npm run check` sin errores.
+- En el simulador:
+  - Cada paso bloquea el avance con sus errores ("La descripción es obligatoria", "Selecciona un departamento").
+  - La barra de progreso se llena paso a paso, la ChoiceCard "Alta" muestra borde y check, y "Editar" vuelve al paso 3 conservando los datos.
+  - Se creó el #14 "Lector de tarjetas no responde" (TI, Alta), que aparece primero en el listado con 8 abiertos y 14 de 14.
+
+### Pendiente
+- Los tickets #13 y #14 de prueba siguen en MockAPI (el #14 tiene una URL de imagen rota a propósito); se eliminarán al probar H6.
+
+---
+
 ## [H5] Crear ticket (POST) — 2026-10-09
 
 ### Agregado

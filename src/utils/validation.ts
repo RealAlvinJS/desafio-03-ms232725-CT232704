@@ -100,3 +100,13 @@ export function hasErrors(errors: TicketFormErrors): boolean {
 export function validateDepartmentName(name: string): string | undefined {
   return lengthError(name, DEPARTMENT_LIMITS.nameMin, DEPARTMENT_LIMITS.nameMax, 'El nombre');
 }
+
+// En formularios por pasos solo se muestran los errores de los campos del paso que se intentó avanzar.
+export function pickErrors(
+  errors: TicketFormErrors,
+  fields: readonly (keyof TicketForm)[],
+): TicketFormErrors {
+  return Object.fromEntries(
+    fields.filter((field) => errors[field]).map((field) => [field, errors[field]]),
+  ) as TicketFormErrors;
+}

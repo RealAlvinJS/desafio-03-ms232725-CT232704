@@ -1,43 +1,80 @@
 import * as Haptics from 'expo-haptics';
-import { router } from 'expo-router';
-import { Plus, Settings } from 'lucide-react-native';
-import { useRef, useState, type ReactNode } from 'react';
+import { LinearGradient } from 'expo-linear-gradient';
+import { router, useFocusEffect } from 'expo-router';
+import { setStatusBarStyle } from 'expo-status-bar';
+import { ArrowLeft, ArrowRight, Plus, Settings } from 'lucide-react-native';
+import { useCallback, useRef, useState, type ReactNode } from 'react';
 import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
+import Animated, { FadeIn, FadeInLeft, FadeInRight } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { Badge } from '@/components/Badge';
 import { Button } from '@/components/Button';
+import { ChoiceCard } from '@/components/ChoiceCard';
 import { CustomInput, FieldError } from '@/components/CustomInput';
 import { FilterChips, type ChipOption } from '@/components/FilterChips';
 import { GradientButton } from '@/components/GradientButton';
+import { StepProgress } from '@/components/StepProgress';
 import { useTabBarInset } from '@/components/TabBar';
+import { TicketReview } from '@/components/TicketReview';
 import { TopInsetCover } from '@/components/TopInsetCover';
-import { INITIAL_STATUS, PRIORITIES, PRIORITY_META } from '@/constants/tickets';
-import { colors, radii, spacing, typography } from '@/constants/theme';
+import { PRIORITIES, PRIORITY_DESCRIPTIONS, PRIORITY_META } from '@/constants/tickets';
+import { colors, motion, radii, sizes, spacing, typography } from '@/constants/theme';
 import { useDepartments } from '@/context/DepartmentsContext';
 import { useTickets } from '@/context/TicketsContext';
-import type { TicketPriority } from '@/types/Entity';
 import {
   EMPTY_TICKET_FORM,
   TICKET_LIMITS,
   hasErrors,
+  pickErrors,
   validateTicket,
   type TicketForm,
 } from '@/utils/validation';
 
-const PRIORITY_OPTIONS: readonly ChipOption<TicketPriority>[] = PRIORITIES.map((priority) => ({
-  value: priority,
-  label: PRIORITY_META[priority].label,
-  color: PRIORITY_META[priority].color,
-}));
+interface Step {
+  title: string;
+  subtitle: string;
+  fields: readonly (keyof TicketForm)[];
+}
 
-interface ChoiceFieldProps {
+const STEPS: readonly Step[] = [
+  {
+    title: 'Describe el problema',
+    subtitle: 'Un título claro y los detalles ayudan a resolverlo más rápido.',
+    fields: ['title', 'description'],
+  },
+  {
+    title: 'Clasifícalo',
+    subtitle: 'Indica el departamento afectado y qué tan urgente es.',
+    fields: ['category', 'priority'],
+  },
+  {
+    title: 'Asígnalo',
+    subtitle: 'Quién lo atenderá y, si tienes, una captura del fallo.',
+    fields: ['assignee', 'imageUrl'],
+  },
+  {
+    title: 'Revisa y crea',
+    subtitle: 'Confirma los datos antes de enviar la solicitud.',
+    fields: [],
+  },
+];
+
+const LAST_STEP = STEPS.length - 1;
+// Barra de acciones fija sobre el navbar: el contenido reserva su alto para no quedar tapado.
+const ACTIONS_HEIGHT = sizes.button + spacing.xl * 2;
+
+// Avanzar entra desde la derecha y retroceder desde la izquierda: el paso se siente como un recorrido.
+const enterForward = FadeInRight.duration(motion.enter);
+const enterBackward = FadeInLeft.duration(motion.enter);
+const headerEntering = FadeIn.duration(motion.enter);
+
+interface FieldGroupProps {
   label: string;
   error?: string;
   children: ReactNode;
 }
 
-function ChoiceField({ label, error, children }: ChoiceFieldProps) {
+function FieldGroup({ label, error, children }: FieldGroupProps) {
   return (
     <View style={styles.field}>
       <Text style={styles.fieldLabel}>{label}</Text>
@@ -52,14 +89,25 @@ export default function CreateTicketScreen() {
   const tabBarInset = useTabBarInset();
   const { addTicket } = useTickets();
   const { departments } = useDepartments();
-
-  const [form, setForm] = useState<TicketForm>(EMPTY_TICKET_FORM);
-  const [submitted, setSubmitted] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
   const scrollRef = useRef<ScrollView>(null);
 
-  // Los errores aparecen tras el primer intento de envío y luego se recalculan en vivo.
-  const errors = submitted ? validateTicket(form) : {};
+  const [form, setForm] = useState<TicketForm>(EMPTY_TICKET_FORM);
+  const [step, setStep] = useState(0);
+  const [direction, setDirection] = useState<1 | -1>(1);
+  const [attempted, setAttempted] = useState<ReadonlySet<number>>(new Set());
+  const [isSaving, setIsSaving] = useState(false);
+
+  // El header es negro: mientras esta tab está enfocada la barra de estado va en claro.
+  useFocusEffect(
+    useCallback(() => {
+      setStatusBarStyle('light');
+      return () => setStatusBarStyle('dark');
+    }, []),
+  );
+
+  const currentStep = STEPS[step] ?? STEPS[0]!;
+  const allErrors = validateTicket(form);
+  const errors = attempted.has(step) ? pickErrors(allErrors, currentStep.fields) : {};
 
   const departmentOptions: ChipOption<string>[] = departments.map((department) => ({
     value: department.name,
@@ -71,10 +119,38 @@ export default function CreateTicketScreen() {
     (value: TicketForm[K]) =>
       setForm((current) => ({ ...current, [key]: value }));
 
-  const handleSubmit = async () => {
-    setSubmitted(true);
+  const goToStep = (target: number) => {
+    setDirection(target > step ? 1 : -1);
+    setStep(target);
+    scrollRef.current?.scrollTo({ y: 0, animated: false });
+  };
 
-    if (hasErrors(validateTicket(form)) || !form.priority) {
+  const handleNext = () => {
+    setAttempted((current) => new Set(current).add(step));
+
+    if (hasErrors(pickErrors(allErrors, currentStep.fields))) {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      return;
+    }
+
+    Haptics.selectionAsync();
+    goToStep(step + 1);
+  };
+
+  const handleBack = () => {
+    Haptics.selectionAsync();
+    goToStep(step - 1);
+  };
+
+  const resetForm = () => {
+    setForm(EMPTY_TICKET_FORM);
+    setAttempted(new Set());
+    setDirection(1);
+    setStep(0);
+  };
+
+  const handleCreate = async () => {
+    if (hasErrors(allErrors) || !form.priority) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       return;
     }
@@ -90,9 +166,7 @@ export default function CreateTicketScreen() {
         imageUrl: form.imageUrl.trim() || undefined,
       });
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      setForm(EMPTY_TICKET_FORM);
-      setSubmitted(false);
-      scrollRef.current?.scrollTo({ y: 0, animated: false });
+      resetForm();
       router.navigate('/');
     } catch (error) {
       Alert.alert(
@@ -104,6 +178,102 @@ export default function CreateTicketScreen() {
     }
   };
 
+  const renderStepContent = () => {
+    switch (step) {
+      case 0:
+        return (
+          <>
+            <CustomInput
+              label="Título del problema"
+              placeholder="Ej. La impresora no imprime"
+              value={form.title}
+              onChangeText={updateField('title')}
+              error={errors.title}
+              maxLength={TICKET_LIMITS.titleMax}
+              autoCapitalize="sentences"
+            />
+            <CustomInput
+              label="Descripción del fallo"
+              placeholder="¿Qué ocurre, desde cuándo y qué ya se intentó?"
+              value={form.description}
+              onChangeText={updateField('description')}
+              error={errors.description}
+              hint={`${form.description.trim().length}/${TICKET_LIMITS.descriptionMax}`}
+              maxLength={TICKET_LIMITS.descriptionMax}
+              multiline
+            />
+          </>
+        );
+      case 1:
+        return (
+          <>
+            <FieldGroup label="Departamento" error={errors.category}>
+              {departmentOptions.length > 0 ? (
+                <FilterChips
+                  options={departmentOptions}
+                  value={form.category || null}
+                  onChange={updateField('category')}
+                  layout="wrap"
+                />
+              ) : (
+                <View style={styles.emptyDepartments}>
+                  <Text style={styles.emptyText}>
+                    No hay departamentos registrados. Agrega uno para poder crear tickets.
+                  </Text>
+                  <Button
+                    label="Ir a Ajustes"
+                    icon={Settings}
+                    onPress={() => router.navigate('/settings')}
+                  />
+                </View>
+              )}
+            </FieldGroup>
+            <FieldGroup label="Prioridad" error={errors.priority}>
+              <View style={styles.choices}>
+                {PRIORITIES.map((priority) => (
+                  <ChoiceCard
+                    key={priority}
+                    title={PRIORITY_META[priority].label}
+                    description={PRIORITY_DESCRIPTIONS[priority]}
+                    color={PRIORITY_META[priority].color}
+                    selected={form.priority === priority}
+                    onPress={() => updateField('priority')(priority)}
+                  />
+                ))}
+              </View>
+            </FieldGroup>
+          </>
+        );
+      case 2:
+        return (
+          <>
+            <CustomInput
+              label="Responsable asignado"
+              placeholder="Ej. Carlos Méndez"
+              value={form.assignee}
+              onChangeText={updateField('assignee')}
+              error={errors.assignee}
+              maxLength={TICKET_LIMITS.assigneeMax}
+              autoCapitalize="words"
+            />
+            <CustomInput
+              label="URL de evidencia (opcional)"
+              placeholder="https://…"
+              value={form.imageUrl}
+              onChangeText={updateField('imageUrl')}
+              error={errors.imageUrl}
+              hint="Captura o foto del problema, en HTTPS."
+              keyboardType="url"
+              autoCapitalize="none"
+              autoCorrect={false}
+            />
+          </>
+        );
+      default:
+        return <TicketReview form={form} onEditStep={goToStep} />;
+    }
+  };
+
   return (
     <View style={styles.screen}>
       <ScrollView
@@ -112,105 +282,55 @@ export default function CreateTicketScreen() {
         keyboardDismissMode="interactive"
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={[
-          styles.content,
-          { paddingTop: insets.top + spacing.md, paddingBottom: tabBarInset },
-        ]}>
-        <View style={styles.header}>
-          <Text style={styles.title}>Nuevo ticket</Text>
-          <Text style={styles.subtitle}>Reporta una falla o solicitud de soporte</Text>
-        </View>
-
-        <View style={styles.form}>
-          <CustomInput
-            label="Título del problema"
-            placeholder="Ej. La impresora no imprime"
-            value={form.title}
-            onChangeText={updateField('title')}
-            error={errors.title}
-            maxLength={TICKET_LIMITS.titleMax}
-            autoCapitalize="sentences"
-          />
-
-          <ChoiceField label="Departamento" error={errors.category}>
-            {departmentOptions.length > 0 ? (
-              <FilterChips
-                options={departmentOptions}
-                value={form.category || null}
-                onChange={updateField('category')}
-                layout="wrap"
-              />
-            ) : (
-              <View style={styles.emptyDepartments}>
-                <Text style={styles.emptyText}>
-                  No hay departamentos registrados. Agrega uno para poder crear tickets.
-                </Text>
-                <Button
-                  label="Ir a Ajustes"
-                  icon={Settings}
-                  onPress={() => router.navigate('/settings')}
-                />
-              </View>
-            )}
-          </ChoiceField>
-
-          <ChoiceField label="Prioridad" error={errors.priority}>
-            <FilterChips
-              options={PRIORITY_OPTIONS}
-              value={form.priority}
-              onChange={updateField('priority')}
-              layout="wrap"
-            />
-          </ChoiceField>
-
-          <CustomInput
-            label="Descripción del fallo"
-            placeholder="¿Qué ocurre, desde cuándo y qué ya se intentó?"
-            value={form.description}
-            onChangeText={updateField('description')}
-            error={errors.description}
-            hint={`${form.description.trim().length}/${TICKET_LIMITS.descriptionMax}`}
-            maxLength={TICKET_LIMITS.descriptionMax}
-            multiline
-          />
-
-          <CustomInput
-            label="Responsable asignado"
-            placeholder="Ej. Carlos Méndez"
-            value={form.assignee}
-            onChangeText={updateField('assignee')}
-            error={errors.assignee}
-            maxLength={TICKET_LIMITS.assigneeMax}
-            autoCapitalize="words"
-          />
-
-          <CustomInput
-            label="URL de evidencia (opcional)"
-            placeholder="https://…"
-            value={form.imageUrl}
-            onChangeText={updateField('imageUrl')}
-            error={errors.imageUrl}
-            hint="Captura o foto del problema, en HTTPS."
-            keyboardType="url"
-            autoCapitalize="none"
-            autoCorrect={false}
-          />
-        </View>
-
-        <View style={styles.footer}>
-          <View style={styles.initialStatus}>
-            <Text style={styles.initialStatusText}>Se registrará como</Text>
-            <Badge status={INITIAL_STATUS} />
+        contentContainerStyle={[styles.content, { paddingBottom: tabBarInset + ACTIONS_HEIGHT }]}>
+        <View style={[styles.header, { paddingTop: insets.top + spacing.md }]}>
+          <View style={styles.headerTop}>
+            <Text style={styles.screenTitle}>Nuevo ticket</Text>
+            <Text style={styles.stepCounter}>
+              Paso {step + 1} de {STEPS.length}
+            </Text>
           </View>
-          <GradientButton
-            label="Crear ticket"
-            icon={Plus}
-            loading={isSaving}
-            onPress={handleSubmit}
-          />
+          <StepProgress total={STEPS.length} current={step} />
+          <Animated.View key={`header-${step}`} entering={headerEntering} style={styles.stepTexts}>
+            <Text style={styles.stepTitle}>{currentStep.title}</Text>
+            <Text style={styles.stepSubtitle}>{currentStep.subtitle}</Text>
+          </Animated.View>
         </View>
+
+        <Animated.View
+          key={`step-${step}`}
+          entering={direction === 1 ? enterForward : enterBackward}
+          style={styles.body}>
+          {renderStepContent()}
+        </Animated.View>
       </ScrollView>
-      <TopInsetCover />
+
+      <View pointerEvents="box-none" style={[styles.actionsBar, { paddingBottom: tabBarInset }]}>
+        <LinearGradient
+          pointerEvents="none"
+          colors={[colors.canvasTransparent, colors.canvas]}
+          locations={[0, 0.2]}
+          style={StyleSheet.absoluteFill}
+        />
+        <View style={styles.actions}>
+          {step > 0 && (
+            <Button label="Atrás" icon={ArrowLeft} onPress={handleBack} disabled={isSaving} />
+          )}
+          <View style={styles.primaryAction}>
+            {step < LAST_STEP ? (
+              <GradientButton label="Siguiente" icon={ArrowRight} onPress={handleNext} />
+            ) : (
+              <GradientButton
+                label="Crear ticket"
+                icon={Plus}
+                loading={isSaving}
+                onPress={handleCreate}
+              />
+            )}
+          </View>
+        </View>
+      </View>
+      <TopInsetCover color={colors.ink} />
     </View>
   );
 }
@@ -221,22 +341,45 @@ const styles = StyleSheet.create({
     backgroundColor: colors.canvas,
   },
   content: {
-    paddingHorizontal: spacing.gutter,
-    gap: spacing.xl,
+    flexGrow: 1,
   },
   header: {
-    alignItems: 'center',
+    backgroundColor: colors.ink,
+    paddingHorizontal: spacing.gutter,
+    paddingBottom: spacing.xl,
+    borderBottomLeftRadius: radii.xl,
+    borderBottomRightRadius: radii.xl,
+    gap: spacing.lg,
+  },
+  headerTop: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    justifyContent: 'space-between',
+  },
+  screenTitle: {
+    ...typography.title,
+    color: colors.textOnDark,
+  },
+  stepCounter: {
+    ...typography.caption,
+    color: colors.textOnDarkMuted,
+    fontVariant: ['tabular-nums'],
+  },
+  stepTexts: {
     gap: spacing.xxs,
   },
-  title: {
-    ...typography.title,
-    color: colors.textPrimary,
+  stepTitle: {
+    ...typography.heading,
+    color: colors.textOnDark,
   },
-  subtitle: {
-    ...typography.caption,
-    color: colors.textSecondary,
+  stepSubtitle: {
+    ...typography.body,
+    color: colors.textOnDarkMuted,
   },
-  form: {
+  body: {
+    flex: 1,
+    paddingHorizontal: spacing.gutter,
+    paddingTop: spacing.xl,
     gap: spacing.lg,
   },
   field: {
@@ -246,6 +389,9 @@ const styles = StyleSheet.create({
     ...typography.label,
     color: colors.textPrimary,
     marginLeft: spacing.xxs,
+  },
+  choices: {
+    gap: spacing.sm,
   },
   emptyDepartments: {
     backgroundColor: colors.surface,
@@ -257,17 +403,19 @@ const styles = StyleSheet.create({
     ...typography.body,
     color: colors.textSecondary,
   },
-  footer: {
-    gap: spacing.md,
+  actionsBar: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    paddingTop: spacing.xl,
   },
-  initialStatus: {
+  actions: {
     flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: spacing.xs,
+    gap: spacing.sm,
+    paddingHorizontal: spacing.gutter,
   },
-  initialStatusText: {
-    ...typography.caption,
-    color: colors.textSecondary,
+  primaryAction: {
+    flex: 1,
   },
 });

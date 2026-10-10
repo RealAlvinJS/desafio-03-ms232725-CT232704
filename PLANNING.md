@@ -195,7 +195,7 @@ CREATE TABLE tickets_cache (
 - Estados explícitos: cargando, error de red con "Reintentar", lista vacía, filtro sin resultados.
 - Banner "Sin conexión · mostrando datos guardados" cuando se sirve desde la caché.
 
-**Crear (`create.tsx`)**
+**Crear (`create.tsx`)** — formulario de 4 pasos (Problema → Clasificación → Asignación → Revisión)
 - Campos: título, departamento (chips desde SQLite), prioridad (segmented), descripción, asignado, URL de evidencia (opcional).
 - Sin departamentos registrados → mensaje con acceso directo a Ajustes.
 - Estado inicial forzado a `open` (no lo elige el usuario).

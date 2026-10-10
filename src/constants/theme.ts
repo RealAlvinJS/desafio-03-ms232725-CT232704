@@ -5,6 +5,7 @@ export const colors = {
   ink2: '#171717',
   ink3: '#262626',
   canvas: '#ECECE9',
+  canvasTransparent: 'rgba(236, 236, 233, 0)',
   surface: '#FFFFFF',
   surfaceMuted: '#F3F3F1',
   border: '#E2E2DE',

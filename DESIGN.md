@@ -147,14 +147,33 @@ que "flota" sobre una zona negra**.
   porque, con el teclado abierto, un botón flotante tapa los campos.
 - `TopInsetCover` tapa la barra de estado para que el contenido no se lea detrás de la hora al hacer scroll.
 
+### 5.2.1 Composición "split invertido" (Nuevo ticket)
+
+Misma firma que el home pero con los colores invertidos: **header negro con esquinas inferiores `xl`** sobre el
+cuerpo `canvas`. Así las tabs se reconocen como familia y cada una tiene su propia identidad.
+
 ### 5.3 Pantallas
 
 | Pantalla | Composición | Contenido clave |
 |---|---|---|
 | Tickets (`index`) | Split | Stat cards, segmented de estado, chips de prioridad y lista |
-| Nuevo (`create`) | Light | Inputs pill, departamento y prioridad como chips en varias filas, nota "Se registrará como Abierto" y CTA con gradiente al final del formulario |
+| Nuevo (`create`) | Split invertido + pasos | Formulario de 4 pasos (ver §5.4) |
 | Detalle (`detail/[id]`) | Light | Card principal con la info, segmented de estado, reasignación y botón eliminar (outline rojo) |
 | Ajustes (`settings`) | Light | Card con la baseURL ("Probar conexión", "Restaurar") + card Departamentos (lista editable, input pill + botón circular "+") |
+
+### 5.4 Formulario por pasos (Nuevo ticket)
+
+| Paso | Título | Contenido |
+|---|---|---|
+| 1 | Describe el problema | Título + descripción |
+| 2 | Clasifícalo | Departamento (chips) + prioridad (`ChoiceCard` con descripción de urgencia) |
+| 3 | Asígnalo | Responsable + URL de evidencia |
+| 4 | Revisa y crea | `TicketReview`: resumen por secciones con "Editar" que salta al paso exacto |
+
+- Header: "Nuevo ticket" + "Paso N de 4", `StepProgress` (un segmento por paso, se llena con gradiente) y título/subtítulo del paso.
+- Barra de acciones **fija** sobre el navbar, con un degradado de `canvas` transparente a sólido: "Atrás" (secundario) + "Siguiente"/"Crear ticket" (gradiente).
+- "Siguiente" solo valida los campos del paso actual; los errores aparecen tras el primer intento en ese paso.
+- La barra de estado se pone clara mientras la tab está enfocada (header negro).
 
 ---
 
@@ -230,6 +249,16 @@ que "flota" sobre una zona negra**.
 - Pill `ink3` sobre la zona negra, dot `amber` + "Sin conexión · mostrando datos guardados" en `caption`.
 - Entra con fade + `translateY -8` en 200 ms y sale igual al recuperar la conexión. No bloquea la lista.
 
+### StepProgress
+- Fila de segmentos de 6 px (`ink3`); completados y actual se llenan con `brandGradient` mediante `scaleX` desde la izquierda (250 ms, ease-out).
+
+### ChoiceCard
+- Card `surface` radio `lg` con dot de color, título `heading`, descripción `caption` y check circular.
+- Seleccionada: borde de 2 px del color de la opción (150 ms) y check con fade + escala 0.8 → 1. Haptic de selección.
+
+### EvidenceImage
+- `expo-image` con radio `md` sobre `surfaceMuted`. Si la URL falla, muestra ícono + "No se pudo cargar la evidencia".
+
 ### Estados (`StateMessage`, `LoadingSpinner`)
 - Loading: `ActivityIndicator` (lo exige el PDF) en el color de texto de la zona.
 - Vacío: logo TT a 64 px, título y subtítulo; entra con fade + `scale 0.95` (momento poco frecuente, se permite el deleite).
@@ -260,6 +289,9 @@ que "flota" sobre una zona negra**.
 | Cambio de estado | Indicar estado | Crossfade de color + haptic de éxito | 200 ms |
 | Eliminar ticket | Feedback | `exiting` FadeOut + haptic Medium | 200 ms |
 | Error de input | Feedback | Fade + `translateY 4` | 150 ms |
+| Cambio de paso | Consistencia espacial | `FadeInRight` al avanzar / `FadeInLeft` al retroceder | 250 ms |
+| Progreso de pasos | Indicar estado | `scaleX` del segmento | 250 ms, ease-out |
+| Selección de ChoiceCard | Feedback | Borde + check (fade/escala) | 150 ms |
 | Estado vacío | Deleite | Fade + `scale 0.95 → 1` | 300 ms |
 | Ir a Detalle | — | Push del stack nativo (sin tocar) | Plataforma |
 | Cambiar de tab | — | **Sin animación de contenido** | — |

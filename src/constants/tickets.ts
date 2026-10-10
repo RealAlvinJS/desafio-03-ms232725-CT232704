@@ -23,6 +23,13 @@ export const PRIORITY_META: Record<TicketPriority, OptionMeta> = {
   low: { label: 'Baja', color: colors.blue },
 };
 
+// Criterio para elegir la urgencia al reportar: se muestra junto a cada opción del formulario.
+export const PRIORITY_DESCRIPTIONS: Record<TicketPriority, string> = {
+  high: 'Detiene el trabajo de una o más personas.',
+  medium: 'Afecta el trabajo, pero hay una alternativa temporal.',
+  low: 'Mejora, solicitud o molestia menor.',
+};
+
 // El listado se clasifica por prioridad: menor peso aparece primero.
 export const PRIORITY_WEIGHT: Record<TicketPriority, number> = {
   high: 0,

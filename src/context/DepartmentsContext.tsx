@@ -42,12 +42,18 @@ export function DepartmentsProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     let isActive = true;
 
-    listDepartments(db).then((rows) => {
-      if (isActive) {
-        setDepartments(rows);
-        setIsLoading(false);
-      }
-    });
+    listDepartments(db)
+      .then((rows) => {
+        if (isActive) {
+          setDepartments(rows);
+        }
+      })
+      .catch((error: unknown) => console.warn('No se pudieron leer los departamentos.', error))
+      .finally(() => {
+        if (isActive) {
+          setIsLoading(false);
+        }
+      });
 
     return () => {
       isActive = false;
