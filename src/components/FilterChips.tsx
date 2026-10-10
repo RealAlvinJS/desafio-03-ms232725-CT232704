@@ -20,9 +20,12 @@ export interface ChipOption<T extends string> {
 
 interface FilterChipsProps<T extends string> {
   options: readonly ChipOption<T>[];
-  value: T;
+  // null = ninguna opción elegida todavía (formularios); los filtros siempre tienen una.
+  value: T | null;
   onChange: (value: T) => void;
   tone?: 'light' | 'dark';
+  // scroll: una fila deslizable (filtros) · wrap: varias filas visibles (formularios).
+  layout?: 'scroll' | 'wrap';
 }
 
 interface ChipProps {
@@ -37,7 +40,7 @@ const DOT_SIZE = 8;
 
 function Chip({ label, color, selected, tone, onPress }: ChipProps) {
   const isDark = tone === 'dark';
-  const idleBorder = isDark ? colors.ink3 : colors.surfaceMuted;
+  const idleBorder = isDark ? colors.ink3 : colors.surface;
   const activeBorder = color ?? (isDark ? colors.textOnDark : colors.textPrimary);
   const progress = useSharedValue(selected ? 1 : 0);
 
@@ -73,27 +76,34 @@ export function FilterChips<T extends string>({
   value,
   onChange,
   tone = 'light',
+  layout = 'scroll',
 }: FilterChipsProps<T>) {
+  const chips = options.map((option) => (
+    <Chip
+      key={option.value}
+      label={option.label}
+      color={option.color}
+      tone={tone}
+      selected={option.value === value}
+      onPress={() => {
+        if (option.value !== value) {
+          Haptics.selectionAsync();
+          onChange(option.value);
+        }
+      }}
+    />
+  ));
+
+  if (layout === 'wrap') {
+    return <View style={[styles.row, styles.wrap]}>{chips}</View>;
+  }
+
   return (
     <ScrollView
       horizontal
       showsHorizontalScrollIndicator={false}
       contentContainerStyle={styles.row}>
-      {options.map((option) => (
-        <Chip
-          key={option.value}
-          label={option.label}
-          color={option.color}
-          tone={tone}
-          selected={option.value === value}
-          onPress={() => {
-            if (option.value !== value) {
-              Haptics.selectionAsync();
-              onChange(option.value);
-            }
-          }}
-        />
-      ))}
+      {chips}
     </ScrollView>
   );
 }
@@ -101,6 +111,10 @@ export function FilterChips<T extends string>({
 const styles = StyleSheet.create({
   row: {
     gap: spacing.xs,
+  },
+  wrap: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
   },
   chip: {
     height: sizes.chip,
@@ -112,7 +126,7 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
   },
   chipLight: {
-    backgroundColor: colors.surfaceMuted,
+    backgroundColor: colors.surface,
   },
   chipDark: {
     backgroundColor: colors.ink3,

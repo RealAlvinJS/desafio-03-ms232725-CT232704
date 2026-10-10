@@ -6,6 +6,44 @@ Se actualiza al cerrar cada hito, junto con su commit. Los hitos están definido
 
 ---
 
+## [H5] Crear ticket (POST) — 2026-10-09
+
+### Agregado
+- `create.tsx`: formulario con título, departamento (chips desde SQLite), prioridad (chips con color), descripción con contador, responsable y URL de evidencia opcional.
+  Muestra "Se registrará como Abierto" y el CTA con gradiente vivo y estado de carga.
+- `CustomInput`: pill con label, borde animado (morado al enfocar, rojo con error), hint y `FieldError` animado (fade + `translateY 4`), reutilizado en los grupos de chips.
+- `utils/validation.ts`: `validateTicket` (requeridos, longitudes, URL HTTPS opcional), `validateDepartmentName` y límites centralizados.
+- `DepartmentsContext`: lista de SQLite y `addDepartment` / `renameDepartment` / `removeDepartment` con validación, unicidad y bloqueo de departamentos en uso (adelantado desde H7, porque el formulario lo necesita).
+- `TopInsetCover`: tapa la barra de estado en pantallas con scroll.
+- `FilterChips`: valor opcional (`null`) y layout `wrap`.
+
+### Decisiones
+- Los errores aparecen tras el primer intento de envío y luego se recalculan en vivo mientras el usuario corrige.
+- La prioridad empieza sin elegir: se fuerza una decisión consciente en lugar de asumir "Media".
+- La URL se valida con una regex y no con `URL`, porque la implementación de React Native no expone todos sus getters.
+- Teclado: `automaticallyAdjustKeyboardInsets` en el ScrollView en lugar de `KeyboardAvoidingView`, que no desplazaba el campo enfocado dentro de la tab.
+- El CTA va al final del formulario y no fijo sobre el navbar (DESIGN.md actualizado).
+- Al crear: haptic de éxito, formulario limpio, scroll al inicio y regreso al listado, donde el ticket ya aparece sin refetch.
+
+### Problemas
+- Mensaje "La descripción es obligatorio" → los errores ahora concuerdan en género.
+- El lint de React Compiler marcó un `setState` dentro de un efecto en `DepartmentsContext`; la carga inicial se movió al callback de la promesa, con guarda de desmontaje.
+- Mismo error transitorio de provider durante la recarga en caliente (se resolvió reiniciando la app).
+
+### Verificado
+- `npm run check` sin errores; reglas de validación probadas con un script (11/11).
+- En el simulador:
+  - Al enviar vacío aparecen los 5 errores y los bordes rojos.
+  - El foco se ve en morado y el teclado ya no tapa el campo enfocado.
+  - Se creó "Monitor parpadea en Recepcion" (TI, Media): MockAPI guardó el #13 con `status: open`, `createdAt` ISO e `imageUrl` vacío.
+  - La app volvió al listado con 7 abiertos y 13 de 13, con el ticket primero en "Media" y "hace un momento".
+  - El formulario quedó limpio.
+
+### Pendiente
+- El ticket #13 de prueba sigue en MockAPI; se usará para probar la eliminación en H6.
+
+---
+
 ## [H4] Estado global y listado (GET) — 2026-10-09
 
 ### Agregado

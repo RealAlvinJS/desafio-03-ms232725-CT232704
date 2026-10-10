@@ -143,14 +143,16 @@ que "flota" sobre una zona negra**.
 
 - Fondo `canvas`, contenido en cards `surface` de radio `lg`.
 - **Header**: botón circular blanco a la izquierda (atrás, solo en Detalle) y título `title` centrado.
-- El **CTA primario** queda anclado abajo, sobre el navbar (patrón "Add Visitor" / "Create Post" de la referencia).
+- El **CTA primario** va al final del contenido, justo encima del espacio del navbar. No se fija sobre el navbar
+  porque, con el teclado abierto, un botón flotante tapa los campos.
+- `TopInsetCover` tapa la barra de estado para que el contenido no se lea detrás de la hora al hacer scroll.
 
 ### 5.3 Pantallas
 
 | Pantalla | Composición | Contenido clave |
 |---|---|---|
 | Tickets (`index`) | Split | Stat cards, segmented de estado, chips de prioridad y lista |
-| Nuevo (`create`) | Light | Inputs pill, selector de departamento (chips), prioridad (segmented) y CTA con gradiente |
+| Nuevo (`create`) | Light | Inputs pill, departamento y prioridad como chips en varias filas, nota "Se registrará como Abierto" y CTA con gradiente al final del formulario |
 | Detalle (`detail/[id]`) | Light | Card principal con la info, segmented de estado, reasignación y botón eliminar (outline rojo) |
 | Ajustes (`settings`) | Light | Card con la baseURL ("Probar conexión", "Restaurar") + card Departamentos (lista editable, input pill + botón circular "+") |
 
@@ -172,7 +174,8 @@ que "flota" sobre una zona negra**.
 - Opciones: `Todos · Abierto · En proceso · Resuelto`.
 
 ### Chip
-- Pill de 36 de alto, fondo `ink3` (sobre negro) o `surfaceMuted` (sobre claro).
+- Pill de 36 de alto, fondo `ink3` (sobre negro) o `surface` (sobre canvas).
+- Layout `scroll` (una fila deslizable, filtros) o `wrap` (varias filas, formularios). Puede no tener nada seleccionado.
 - Variante filtro: dot de color + label; al seleccionarlo, el borde de 1.5 toma el color del dot (transición de 150 ms).
 - Variante etiqueta (departamento): solo texto, sin interacción.
 
