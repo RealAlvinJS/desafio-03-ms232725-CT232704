@@ -16,8 +16,12 @@ Desafío Práctico 3 — DPS, Universidad Don Bosco.
 
 ```bash
 npm install
+cp .env.example .env
 npm start
 ```
+
+`.env` define `EXPO_PUBLIC_API_URL`, la URL base del proyecto en MockAPI.io (sin `/tickets`).
+También se puede cambiar en tiempo de ejecución desde la pestaña **Ajustes**.
 
 Escanea el QR con Expo Go o presiona `a` (Android) / `i` (iOS) en la terminal.
 

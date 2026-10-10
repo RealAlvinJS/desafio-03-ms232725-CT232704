@@ -1,5 +1,6 @@
-// Reemplazar con la URL generada en MockAPI.io; Ajustes permite cambiarla en tiempo de ejecución.
-export const DEFAULT_BASE_URL = 'https://XXXXXXXX.mockapi.io/api/v1';
+// La URL viene de EXPO_PUBLIC_API_URL (.env); Ajustes permite cambiarla en tiempo de ejecución.
+// Sin .env se usa el placeholder y el listado mostrará el error de red controlado.
+export const DEFAULT_BASE_URL = process.env.EXPO_PUBLIC_API_URL ?? 'https://XXXXXXXX.mockapi.io';
 
 export const REQUEST_TIMEOUT_MS = 10000;
 
