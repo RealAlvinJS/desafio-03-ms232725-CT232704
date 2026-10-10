@@ -5,6 +5,8 @@ import { colors, radii, sizes } from '@/constants/theme';
 
 import { PressableScale } from './PressableScale';
 
+const SMALL_SIZE = 40;
+
 interface IconButtonProps {
   icon: LucideIcon;
   accessibilityLabel: string;
@@ -12,6 +14,7 @@ interface IconButtonProps {
   // light: sobre canvas · muted: sobre superficies blancas · dark: sobre la zona negra.
   tone?: 'light' | 'muted' | 'dark';
   iconColor?: string;
+  size?: 'md' | 'sm';
 }
 
 export function IconButton({
@@ -20,6 +23,7 @@ export function IconButton({
   onPress,
   tone = 'light',
   iconColor,
+  size = 'md',
 }: IconButtonProps) {
   const isDark = tone === 'dark';
 
@@ -27,10 +31,10 @@ export function IconButton({
     <PressableScale
       onPress={onPress}
       accessibilityLabel={accessibilityLabel}
-      style={[styles.button, styles[tone]]}>
+      style={[styles.button, size === 'sm' && styles.small, styles[tone]]}>
       <Icon
         color={iconColor ?? (isDark ? colors.textOnDark : colors.textPrimary)}
-        size={sizes.icon}
+        size={size === 'sm' ? sizes.iconSmall + 2 : sizes.icon}
         strokeWidth={sizes.iconStroke}
       />
     </PressableScale>
@@ -44,6 +48,10 @@ const styles = StyleSheet.create({
     borderRadius: radii.pill,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  small: {
+    width: SMALL_SIZE,
+    height: SMALL_SIZE,
   },
   light: {
     backgroundColor: colors.surface,

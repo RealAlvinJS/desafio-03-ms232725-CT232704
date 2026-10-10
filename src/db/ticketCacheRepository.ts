@@ -47,6 +47,10 @@ export async function upsertCachedTicket(
   );
 }
 
+export async function clearCachedTickets(db: SQLiteDatabase): Promise<void> {
+  await db.runAsync('DELETE FROM tickets_cache');
+}
+
 export async function deleteCachedTicket(db: SQLiteDatabase, id: string): Promise<void> {
   await db.runAsync('DELETE FROM tickets_cache WHERE id = ?', id);
 }

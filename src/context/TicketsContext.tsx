@@ -10,17 +10,19 @@ import {
 } from 'react';
 
 import {
+  clearCachedTickets,
   deleteCachedTicket,
   readCachedTickets,
   replaceCachedTickets,
   upsertCachedTicket,
 } from '@/db/ticketCacheRepository';
-import { getBaseUrl, getErrorMessage } from '@/services/api';
+import { getBaseUrl, getErrorMessage, normalizeBaseUrl, setBaseUrl } from '@/services/api';
 import {
   createItem,
   deleteItem,
   getItemById,
   getItems,
+  pingTickets,
   updateItem,
 } from '@/services/resourceService';
 import type { Ticket, TicketInput, TicketUpdate } from '@/types/Entity';
@@ -33,6 +35,7 @@ interface TicketsState {
   error: string | null;
   isOffline: boolean;
   isRefreshing: boolean;
+  baseUrl: string;
 }
 
 type TicketsAction =
@@ -41,7 +44,8 @@ type TicketsAction =
   | { type: 'fetch_succeeded'; tickets: Ticket[] }
   | { type: 'fetch_failed'; error: string }
   | { type: 'ticket_saved'; ticket: Ticket }
-  | { type: 'ticket_removed'; id: string };
+  | { type: 'ticket_removed'; id: string }
+  | { type: 'base_url_changed'; baseUrl: string };
 
 interface TicketsContextValue extends TicketsState {
   fetchTickets: (options?: { refreshing?: boolean }) => Promise<void>;
@@ -49,6 +53,8 @@ interface TicketsContextValue extends TicketsState {
   addTicket: (input: TicketInput) => Promise<Ticket>;
   editTicket: (id: string, changes: TicketUpdate) => Promise<Ticket>;
   removeTicket: (id: string) => Promise<void>;
+  changeBaseUrl: (url: string) => Promise<void>;
+  testConnection: (url: string) => Promise<number>;
 }
 
 const initialState: TicketsState = {
@@ -57,6 +63,7 @@ const initialState: TicketsState = {
   error: null,
   isOffline: false,
   isRefreshing: false,
+  baseUrl: getBaseUrl(),
 };
 
 function ticketsReducer(state: TicketsState, action: TicketsAction): TicketsState {
@@ -94,6 +101,9 @@ function ticketsReducer(state: TicketsState, action: TicketsAction): TicketsStat
         tickets: state.tickets.filter((ticket) => ticket.id !== action.id),
         isOffline: false,
       };
+    case 'base_url_changed':
+      // Otra fuente de datos: nada de lo cargado antes sigue siendo válido.
+      return { ...initialState, baseUrl: action.baseUrl };
   }
 }
 
@@ -210,9 +220,47 @@ export function TicketsProvider({ children }: { children: ReactNode }) {
     [db],
   );
 
+  // Cambiar de URL descarta la caché y el estado para no mezclar tickets de dos servidores.
+  const changeBaseUrl = useCallback(
+    async (url: string) => {
+      const baseUrl = normalizeBaseUrl(url);
+      setBaseUrl(baseUrl);
+      dispatch({ type: 'base_url_changed', baseUrl });
+      await clearCachedTickets(db).catch(reportCacheError);
+      await fetchTickets();
+    },
+    [db, fetchTickets],
+  );
+
+  const testConnection = useCallback(async (url: string) => {
+    try {
+      return await pingTickets(url);
+    } catch (error) {
+      throw toFriendlyError(error);
+    }
+  }, []);
+
   const value = useMemo(
-    () => ({ ...state, fetchTickets, fetchTicket, addTicket, editTicket, removeTicket }),
-    [state, fetchTickets, fetchTicket, addTicket, editTicket, removeTicket],
+    () => ({
+      ...state,
+      fetchTickets,
+      fetchTicket,
+      addTicket,
+      editTicket,
+      removeTicket,
+      changeBaseUrl,
+      testConnection,
+    }),
+    [
+      state,
+      fetchTickets,
+      fetchTicket,
+      addTicket,
+      editTicket,
+      removeTicket,
+      changeBaseUrl,
+      testConnection,
+    ],
   );
 
   return <TicketsContext value={value}>{children}</TicketsContext>;

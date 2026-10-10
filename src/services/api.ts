@@ -15,8 +15,12 @@ export function getBaseUrl(): string {
 }
 
 // Sin barra final para que '/tickets' no genere rutas con doble barra.
+export function normalizeBaseUrl(url: string): string {
+  return url.trim().replace(/\/+$/, '');
+}
+
 export function setBaseUrl(url: string): void {
-  api.defaults.baseURL = url.trim().replace(/\/+$/, '');
+  api.defaults.baseURL = normalizeBaseUrl(url);
 }
 
 export function getErrorMessage(error: unknown): string {
