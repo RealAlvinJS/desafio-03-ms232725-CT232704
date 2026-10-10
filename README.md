@@ -3,6 +3,8 @@
 App móvil tipo Helpdesk para reportar y gestionar tickets de soporte técnico.
 Desafío Práctico 3 — Desarrollo de Aplicaciones con Software Propietario (DPS), Universidad Don Bosco.
 
+**Repositorio:** https://github.com/RealAlvinJS/desafio-03-ms232725-CT232704
+
 **Stack:** Expo SDK 57 · expo-router · TypeScript estricto · Axios · MockAPI.io · expo-sqlite · Reanimated.
 
 ## Requisitos

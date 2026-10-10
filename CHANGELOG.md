@@ -17,6 +17,7 @@ Se actualiza al cerrar cada hito, junto con su commit. Los hitos están definido
 - Layout raíz con carga de fuentes y splash; Tabs provisionales (Tickets / Nuevo / Ajustes) y ruta `detail/[id]` con placeholders.
 - `app.json`: nombre TicketTracker, interfaz clara y splash/ícono Android en `ink`.
 - README inicial y `.claude/launch.json` para previsualizar en web.
+- Repositorio público: https://github.com/RealAlvinJS/desafio-03-ms232725-CT232704
 
 ### Decisiones
 - Se partió del template `default` (ya trae `src/app`, Reanimated y Worklets) en lugar de `blank-typescript`.
@@ -36,7 +37,6 @@ Se actualiza al cerrar cada hito, junto con su commit. Los hitos están definido
 ### Pendiente
 - `ScreenPlaceholder` es temporal: se elimina cuando cada pantalla se implemente (H4–H7).
 - Tabs provisionales nativas → navbar flotante animado en H3.
-- Repositorio público en GitHub.
 
 ---
 
