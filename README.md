@@ -23,6 +23,11 @@ npm start
 `.env` define `EXPO_PUBLIC_API_URL`, la URL base del proyecto en MockAPI.io (sin `/tickets`).
 También se puede cambiar en tiempo de ejecución desde la pestaña **Ajustes**.
 
+### MockAPI
+
+El proyecto en MockAPI.io tiene un recurso `tickets` con los campos `title`, `category`, `priority`, `status`,
+`description`, `assignee`, `imageUrl` (String) y `createdAt` (Date). Para recrear los datos: `npm run seed:reset`.
+
 Escanea el QR con Expo Go o presiona `a` (Android) / `i` (iOS) en la terminal.
 
 ## Scripts
@@ -34,6 +39,8 @@ Escanea el QR con Expo Go o presiona `a` (Android) / `i` (iOS) en la terminal.
 | `npm run lint` | ESLint (config de Expo + Prettier) |
 | `npm run check` | Typecheck + lint |
 | `npm run format` | Formatea el código con Prettier |
+| `npm run seed` | Carga los 12 tickets de `docs/seed-tickets.json` en MockAPI (recurso vacío) |
+| `npm run seed:reset` | Borra los tickets actuales de MockAPI y vuelve a cargar el seed |
 
 ## Documentación del proyecto
 

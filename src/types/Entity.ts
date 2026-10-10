@@ -19,7 +19,8 @@ export interface Ticket extends EntityItem {
   assignee: string;
 }
 
-export type TicketInput = Omit<Ticket, 'id' | 'createdAt'>;
+// El estado no viaja en la entrada: el servicio fija el inicial.
+export type TicketInput = Omit<Ticket, 'id' | 'createdAt' | 'status'>;
 
 export type TicketUpdate = Partial<Pick<Ticket, 'status' | 'assignee'>>;
 

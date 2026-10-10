@@ -6,6 +6,40 @@ Se actualiza al cerrar cada hito, junto con su commit. Los hitos están definido
 
 ---
 
+## [H2] Backend y capa de servicios — 2026-10-09
+
+### Agregado
+- `docs/seed-tickets.json`: 12 tickets coherentes que cubren las 9 combinaciones de prioridad × estado, en los 6 departamentos, con fotos HTTPS de Unsplash revisadas una por una.
+- `scripts/seed-mockapi.mjs` + `npm run seed` / `seed:reset`: carga el seed en MockAPI leyendo la URL del `.env`.
+- MockAPI poblado: `GET /tickets` devuelve los 12 tickets con ids 1–12.
+- `services/api.ts`: instancia Axios, `getBaseUrl`/`setBaseUrl` y `getErrorMessage`, que traduce timeout, sin conexión, 404 y 5xx a mensajes en español.
+- `services/resourceService.ts`: `getItems`, `getItemById`, `createItem`, `updateItem` (PATCH) y `deleteItem`, con la normalización `toTicket`.
+- `db/database.ts`: migraciones versionadas con `PRAGMA user_version`, en WAL; la v1 crea `departments` y `tickets_cache` e inserta los 6 departamentos por defecto.
+- `db/departmentRepository.ts` y `db/ticketCacheRepository.ts`: funciones SQL puras que reciben la base (sin React).
+
+### Decisiones
+- La baseURL no lleva `/api/v1`: el proyecto de MockAPI se creó sin prefijo.
+- **PATCH** para actualizar: MockAPI lo soporta y hace merge parcial, que es la semántica correcta para cambiar estado o asignado.
+- `TicketInput` ya no incluye `status`: `createItem` siempre envía `open`, así la regla "todo ticket nace Abierto" vive en un solo lugar.
+- `createItem` siempre envía `createdAt` (ISO) e `imageUrl`: si faltan, MockAPI pone un timestamp numérico y un texto basura (`"imageUrl 13"`).
+- `toTicket` normaliza lo leído: timestamps numéricos → ISO e `imageUrl` que no sea HTTPS → `undefined`.
+- "Departamento en uso" se resuelve en SQL con `json_extract` sobre la caché, sin depender del estado de React.
+- La caché guarda la baseURL de origen: copias de otra URL se ignoran y un reemplazo total limpia todo.
+
+### Problemas
+- La búsqueda de Unsplash devolvió dos fotos poco coherentes (un render 3D y un setup gamer); se reemplazaron por otras más adecuadas.
+- `tsx` necesita la extensión `.mts` para ejecutar scripts con `await` de nivel superior.
+
+### Verificado
+- `npm run check` sin errores.
+- Contra MockAPI real: `getItems` → 12 tickets con fechas ISO e imágenes HTTPS; `getItemById`; 404 y red caída devuelven mensajes controlados; ciclo crear → PATCH → borrar sin dejar residuos.
+- SQL de los repositorios probado con `node:sqlite` mediante un adaptador con la interfaz de expo-sqlite: migración idempotente, seed de 6 departamentos, unicidad sin distinguir mayúsculas, rename/delete, caché por baseURL, upsert/delete y conteo por departamento.
+
+### Pendiente
+- Probar SQLite en un dispositivo o simulador real cuando se monte `SQLiteProvider` (H3).
+
+---
+
 ## [H1] Scaffold y fundamentos — 2026-10-09
 
 ### Agregado

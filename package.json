@@ -45,7 +45,9 @@
     "lint": "expo lint",
     "typecheck": "tsc --noEmit",
     "format": "prettier --write .",
-    "check": "npm run typecheck && npm run lint"
+    "check": "npm run typecheck && npm run lint",
+    "seed": "node scripts/seed-mockapi.mjs",
+    "seed:reset": "node scripts/seed-mockapi.mjs --reset"
   },
   "private": true
 }

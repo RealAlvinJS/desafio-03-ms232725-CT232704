@@ -1,0 +1,122 @@
+[
+  {
+    "title": "Servidor de correo no envía mensajes externos",
+    "category": "TI",
+    "priority": "high",
+    "status": "open",
+    "description": "Desde las 8:00 a. m. los correos hacia dominios externos quedan en la bandeja de salida. Los internos funcionan con normalidad.",
+    "assignee": "Carlos Méndez",
+    "imageUrl": "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=800&q=80&fit=crop&auto=format",
+    "createdAt": "2026-10-08T14:20:00.000Z"
+  },
+  {
+    "title": "Caída de red en el segundo piso",
+    "category": "Operaciones",
+    "priority": "high",
+    "status": "in_progress",
+    "description": "Ningún equipo del segundo piso tiene acceso a la red. El switch del rack muestra luces ámbar intermitentes.",
+    "assignee": "Andrea López",
+    "imageUrl": "https://images.unsplash.com/photo-1683322499436-f4383dd59f5a?w=800&q=80&fit=crop&auto=format",
+    "createdAt": "2026-10-07T09:05:00.000Z"
+  },
+  {
+    "title": "Sistema de planillas no carga",
+    "category": "Recursos Humanos",
+    "priority": "high",
+    "status": "resolved",
+    "description": "El módulo de planillas se queda cargando al abrir el cierre de septiembre. Se requiere para el pago quincenal.",
+    "assignee": "Diego Ramírez",
+    "imageUrl": "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&q=80&fit=crop&auto=format",
+    "createdAt": "2026-09-29T16:40:00.000Z"
+  },
+  {
+    "title": "Proyector de la sala de juntas sin señal",
+    "category": "Administración",
+    "priority": "high",
+    "status": "open",
+    "description": "El proyector enciende pero muestra 'Sin señal' con cualquier laptop. Hay reunión con clientes mañana a las 10:00.",
+    "assignee": "Andrea López",
+    "imageUrl": "https://images.unsplash.com/photo-1694253987646-353954f1889d?w=800&q=80&fit=crop&auto=format",
+    "createdAt": "2026-10-09T08:15:00.000Z"
+  },
+  {
+    "title": "Impresora de Finanzas atasca el papel",
+    "category": "Finanzas",
+    "priority": "medium",
+    "status": "open",
+    "description": "La impresora del área atasca hojas en la bandeja 2 cada tres o cuatro impresiones. Ya se revisó que el papel no esté húmedo.",
+    "assignee": "Carlos Méndez",
+    "imageUrl": "https://images.unsplash.com/photo-1612815154858-60aa4c59eaa6?w=800&q=80&fit=crop&auto=format",
+    "createdAt": "2026-10-06T11:30:00.000Z"
+  },
+  {
+    "title": "Laptop se reinicia al conectar el cargador",
+    "category": "Ventas",
+    "priority": "medium",
+    "status": "in_progress",
+    "description": "El equipo se apaga y reinicia en cuanto se conecta el cargador. Con batería funciona bien.",
+    "assignee": "Sofía Hernández",
+    "imageUrl": "https://images.unsplash.com/photo-1583863788434-e58a36330cf0?w=800&q=80&fit=crop&auto=format",
+    "createdAt": "2026-10-05T15:10:00.000Z"
+  },
+  {
+    "title": "Acceso denegado a carpeta compartida",
+    "category": "Administración",
+    "priority": "medium",
+    "status": "resolved",
+    "description": "Al abrir la carpeta 'Contratos 2026' en el servidor de archivos aparece 'Acceso denegado'. Antes sí tenía permisos.",
+    "assignee": "Andrea López",
+    "imageUrl": "https://images.unsplash.com/photo-1602763288580-927cfda37a72?w=800&q=80&fit=crop&auto=format",
+    "createdAt": "2026-09-30T10:00:00.000Z"
+  },
+  {
+    "title": "VPN se desconecta cada 10 minutos",
+    "category": "Finanzas",
+    "priority": "medium",
+    "status": "open",
+    "description": "Trabajando desde casa la VPN corporativa se cae cada 10 minutos y obliga a iniciar sesión de nuevo.",
+    "assignee": "Diego Ramírez",
+    "imageUrl": "https://images.unsplash.com/photo-1618424181497-157f25b6ddd5?w=800&q=80&fit=crop&auto=format",
+    "createdAt": "2026-10-08T19:45:00.000Z"
+  },
+  {
+    "title": "Solicitud de segundo monitor",
+    "category": "Ventas",
+    "priority": "low",
+    "status": "open",
+    "description": "Solicito un segundo monitor para trabajar con el CRM y las cotizaciones al mismo tiempo.",
+    "assignee": "Sofía Hernández",
+    "imageUrl": "https://images.unsplash.com/photo-1671523435843-e3cd426c24e4?w=800&q=80&fit=crop&auto=format",
+    "createdAt": "2026-10-04T13:25:00.000Z"
+  },
+  {
+    "title": "Teclas del teclado no responden",
+    "category": "Recursos Humanos",
+    "priority": "low",
+    "status": "in_progress",
+    "description": "Las teclas Ñ, L y punto no responden o requieren presionarse varias veces.",
+    "assignee": "Diego Ramírez",
+    "imageUrl": "https://images.unsplash.com/photo-1574012716378-0ca6f4c18c08?w=800&q=80&fit=crop&auto=format",
+    "createdAt": "2026-10-03T08:50:00.000Z"
+  },
+  {
+    "title": "Actualizar Office en el equipo de recepción",
+    "category": "Administración",
+    "priority": "low",
+    "status": "resolved",
+    "description": "El equipo de recepción tiene una versión antigua de Office y no abre algunos archivos que envían los clientes.",
+    "assignee": "Carlos Méndez",
+    "imageUrl": "https://images.unsplash.com/photo-1579765754037-5bfef757251a?w=800&q=80&fit=crop&auto=format",
+    "createdAt": "2026-09-26T17:05:00.000Z"
+  },
+  {
+    "title": "Teléfono IP sin tono de marcado",
+    "category": "Ventas",
+    "priority": "low",
+    "status": "open",
+    "description": "El teléfono de la extensión 214 enciende pero no da tono al descolgar. Se probó con otro cable de red.",
+    "assignee": "Sofía Hernández",
+    "imageUrl": "https://images.unsplash.com/photo-1587560699334-bea93391dcef?w=800&q=80&fit=crop&auto=format",
+    "createdAt": "2026-10-09T07:40:00.000Z"
+  }
+]

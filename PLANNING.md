@@ -107,7 +107,8 @@ export interface Ticket extends EntityItem {
   assignee: string;
 }
 
-export type TicketInput = Omit<Ticket, 'id' | 'createdAt'>;
+// El estado no viaja en la entrada: el servicio fija el inicial.
+export type TicketInput = Omit<Ticket, 'id' | 'createdAt' | 'status'>;
 
 export interface Department {
   id: number;
@@ -134,7 +135,9 @@ export interface Department {
 | `createdAt`   | string   | ISO date                                  |
 
 - **Mínimo 10 registros** seed coherentes (mezcla de prioridades, estados y departamentos) con imágenes HTTPS funcionales.
-- Seed preparado en `docs/seed-tickets.json`; el recurso en MockAPI.io lo crea Alvin y comparte la baseURL.
+- Seed en `docs/seed-tickets.json`, cargado con `npm run seed` (`scripts/seed-mockapi.mjs`).
+- La baseURL no lleva prefijo (`https://<id>.mockapi.io`) y se lee de `EXPO_PUBLIC_API_URL`.
+- Actualizaciones con **PATCH** (MockAPI hace merge parcial).
 
 ### 1.5 Base de datos local (`expo-sqlite`)
 
